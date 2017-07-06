@@ -1,89 +1,35 @@
-Menu::Menu(LiquidCrystal lcd)
-{
-	for (size_t i = 0; i < 3; i++)
-	{
-		for (size_t j = 0; j < 4; j++)
-		{
-			if (j != 3) objects[i][j] = "(              ";
-			else objects[i][j] = "|______________|";
-		}
-	}
-	objects[0][0] = "Programms:";
-	objects[0][1] = "1:123_232";
-	objects[0][2] = "2:\(@_@)/";
-	objects[1][0] = "3: empty";
-	objects[2][0] = "World";
-	// Print a message to the LCD.
-	lcd.print("Input: ");
-}
+#include <LiquidCrystal.h>
 
-Menu::~Menu()
+class Menu
 {
-}
+public:
+	Menu() {}
+	Menu(LiquidCrystal lcd);
+	~Menu();
 
-void Menu::DrawMenu(LiquidCrystal lcd)
-{
+	void PrintWord(LiquidCrystal lcd, char word, int x, int y);
 
-	lcd.setCursor(0, 1);
-	lcd.print(objects[curX][curY + 1]);
-	lcd.setCursor(0, 0);
-	lcd.print(objects[curX][curY]);
-}
+	void PrintWord(LiquidCrystal lcd, String word, int x, int y);
 
-void Menu::Notification(LiquidCrystal lcd, int i)
-{
-	lcd.clear();
-	lcd.setCursor(0, 0);
-	lcd.print(notification[i]);
-}
+	void DrawMenu(LiquidCrystal lcd);
 
-void Menu::Input(char ch)
-{
-	if (curY != 0 && objects[curX][curY].length() < 20)
-	{
-		objects[curX][curY] += ch;
-	}
-}
+	void Notification(LiquidCrystal lcd, int i);
 
-void Menu::DelLast(LiquidCrystal lcd)
-{
-	if (curY != 0 && objects[curX][curY].length() > 2)
-	{
-		objects[curX][curY] = objects[curX][curY].substring(0, objects[curX][curY].length() - 1);
-		lcd.clear();
-	}
-}
+	void Input(char word);
 
-void Menu::PrintWord(LiquidCrystal lcd, char word, int x, int y)
-{
-	lcd.setCursor(x, y);
-	lcd.print(word);
-}
+	void DelLast(LiquidCrystal lcd);
 
-void Menu::PrintWord(LiquidCrystal lcd, String word, int x, int y)
-{
-	lcd.setCursor(x, y);
-	lcd.print(word);
-}
+	void Right(LiquidCrystal lcd);
 
-void Menu::Right(LiquidCrystal lcd)
-{
-	lcd.scrollDisplayLeft();
-}
+	void Left(LiquidCrystal lcd);
 
-void Menu::Left(LiquidCrystal lcd)
-{
-	lcd.scrollDisplayRight();
-}
+	void Up(LiquidCrystal lcd);
 
-void Menu::Down(LiquidCrystal lcd)
-{
-	lcd.clear();
-	if (curY < maxY - 2) curY++;
-}
+	void Down(LiquidCrystal lcd);
 
-void Menu::Up(LiquidCrystal lcd)
-{
-	lcd.clear();
-	if (curY > 0) curY--;
-}
+	int maxX = 3, maxY = 4;
+	String objects[3][4];
+
+	int curX = 0;
+	int curY = 0;
+};

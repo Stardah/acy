@@ -1,4 +1,5 @@
 #include <LiquidCrystal.h>
+#include <LiquidCrystalRus.h>
 
 class Menu
 {

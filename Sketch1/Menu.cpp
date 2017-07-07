@@ -8,12 +8,17 @@ String iz = "";
 Menu::Menu(const LiquidCrystal& lcdInit) :
 	lcd(lcdInit)
 {
-	for (size_t i = 0; i < 3; i++)
+	/************************************
+	* Это что за магические цифры? 3 и 4
+	************************************/
+	for (size_t i = 0; i < maxX; i++)
 	{
-		for (size_t j = 0; j < 4; j++)
+		for (size_t j = 0; j < maxY; j++)
 		{
-			if (j != 3) items[i][j] = "(              ";
-			else items[i][j] = "|______________|";
+			if (j != maxY - 1)
+				items[i][j] = "(              ";
+			else 
+				items[i][j] = "|______________|";
 		}
 	}
 
@@ -31,7 +36,7 @@ Menu::Menu(const LiquidCrystal& lcdInit) :
 	dlin += char(224); // d
 	dlin += char(187);// l
 	// dlin += char(184); // i
-	// dlin+=char(189); // n
+	// dlin += char(189); // n
 	kol += char(187);
 	iz += char(165);
 	iz += char(183);
@@ -61,7 +66,7 @@ void Menu::DrawMenu()
 void Menu::RunProg(int id, int leng, int amt) 
 {
 	lcd.clear();
-	items[1][0] = String(id)+"." + dlin + ":" + "0" + " " + iz + " " + String(leng);
+	items[1][0] = String(id) + "." + dlin + ":" + "0" + " " + iz + " " + String(leng);
 	items[1][1] = kol + ":" + "0" + " " + iz + " " + String(amt);
 	curX = 1;
 	curY = 0;

@@ -8,7 +8,8 @@ LiquidCrystal lcd(19, 18, 17, 16, 15, 14); // Display
 
 const byte ROWS = 4; // Four rows
 const byte COLS = 4; // Four columns
-char keys[ROWS][COLS] = { // Array buttons-chars
+char keys[ROWS][COLS] =
+{ // Array buttons-chars
 	{ '1','2','3','A'},
 	{ '4','5','6','B'},
 	{ '7','8','9','C'},
@@ -110,7 +111,7 @@ void MenuMode(char key)
 		menu.Left();
 		break;
 	case '#':
-		if (menu.curY != 0 && !progRun)
+		if (menu.getY() != 0 && !progRun)
 		{
 			input = true;
 			lcd.cursor();
@@ -124,7 +125,7 @@ void MenuMode(char key)
 		menu.Down();
 		break;
 	case 'A':
-		if (menu.curY != 0 && !input)
+		if (menu.getY() != 0 && !input)
 		{
 			progRun = true;
 			menu.RunProg(programs[0].id, programs[0].leng, programs[0].amt);

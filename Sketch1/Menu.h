@@ -25,8 +25,8 @@ public:
 	int getY() const;
 
 private:
-	static const int maxX = 3;
-	static const int maxY = 16;
+	static const size_t maxX = 3;
+	static const size_t maxY = 16;
 
 	LiquidCrystal lcd;
 	String items[maxX][maxY - 1];

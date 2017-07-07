@@ -8,7 +8,8 @@ LiquidCrystal lcd(19, 18, 17, 16, 15, 14); // Display
 
 const byte ROWS = 4; // Four rows
 const byte COLS = 4; // Four columns
-char keys[ROWS][COLS] = { // Array buttons-chars
+char keys[ROWS][COLS] =
+{ // Array buttons-chars
 	{ '1','2','3','A'},
 	{ '4','5','6','B'},
 	{ '7','8','9','C'},
@@ -33,13 +34,13 @@ void Addprog(int id, int leng, int amt)
 	programs[id].id = id;
 	programs[id].leng = leng;
 	programs[id].amt = amt;
-	menu.UpdateProgRaw(lcd, id, leng, amt);
+	menu.UpdateProgRaw(id, leng, amt);
 }
 
 void setup()
 {
 	lcd.begin(16, 2);
-	menu.DrawMenu(lcd);
+	menu.DrawMenu();
 	Serial.begin(9600);
 
 	for (int i = 0; i < 16; i++) {
@@ -59,7 +60,7 @@ void loop()
 		else if (progRun) RunningMode(key);
 		else if (stop) StopMode(key);
 		else MenuMode(key);
-		menu.DrawMenu(lcd);
+		menu.DrawMenu();
 	}
 }
 
@@ -68,7 +69,7 @@ void RunningMode(char key)
 	if (key == 'A') {
 		progRun = false;
 		stop = true;
-		menu.StopProg(lcd);
+		menu.StopProg();
 	}
 }
 
@@ -78,13 +79,13 @@ void StopMode(char key)
 	{
 		if (key == '#')
 		{
-			menu.RunProg(lcd, programs[curProg].id, programs[curProg].leng, programs[curProg].amt);
+			menu.RunProg(programs[curProg].id, programs[curProg].leng, programs[curProg].amt);
 			stop = false;
 			progRun = true;
 		}
 		else if (key == '*')
 		{
-			menu.MenuMode(lcd);
+			menu.MenuMode();
 			stop = false;
 		}
 	}
@@ -98,7 +99,7 @@ void InputMode(char key)
 		lcd.noCursor();
 		lcd.noBlink();
 	}
-	else if (key == 'C') menu.DelLast(lcd);
+	else if (key == 'C') menu.DelLast();
 	else menu.Input(key);
 }
 
@@ -107,10 +108,10 @@ void MenuMode(char key)
 	switch (key)
 	{
 	case '*':
-		menu.Left(lcd);
+		menu.Left();
 		break;
 	case '#':
-		if (menu.curY != 0 && !progRun)
+		if (menu.getY() != 0 && !progRun)
 		{
 			input = true;
 			lcd.cursor();
@@ -118,16 +119,16 @@ void MenuMode(char key)
 		}
 		break;
 	case 'B':
-		menu.Up(lcd);
+		menu.Up();
 		break;
 	case 'C':
-		menu.Down(lcd);
+		menu.Down();
 		break;
 	case 'A':
-		if (menu.curY != 0 && !input)
+		if (menu.getY() != 0 && !input)
 		{
 			progRun = true;
-			menu.RunProg(lcd, programs[0].id, programs[0].leng, programs[0].amt);
+			menu.RunProg(programs[0].id, programs[0].leng, programs[0].amt);
 			//lcd.cursor();
 			//lcd.blink();
 		}

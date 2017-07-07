@@ -5,7 +5,7 @@ String dlin = "";
 String kol = "Ko";
 String iz = "";
 
-Menu::Menu(LiquidCrystal lcd)
+Menu::Menu(LiquidCrystal& lcd)
 {
 	for (size_t i = 0; i < 3; i++)
 	{
@@ -47,12 +47,12 @@ Menu::~Menu()
 {
 }
 
-void Menu::UpdateProgRaw(LiquidCrystal lcd, int id, int leng, int amt)
+void Menu::UpdateProgRaw(LiquidCrystal& lcd, int id, int leng, int amt)
 {
 	objects[0][id+1] = String(id)+"." + dlin +":"+ String(leng)+" "+ kol + ":"+String(amt);
 }
 
-void Menu::DrawMenu(LiquidCrystal lcd)
+void Menu::DrawMenu(LiquidCrystal& lcd)
 {
 	lcd.setCursor(0, 1);
 	lcd.print(objects[curX][curY + 1]);
@@ -60,7 +60,7 @@ void Menu::DrawMenu(LiquidCrystal lcd)
 	lcd.print(objects[curX][curY]);
 }
 
-void Menu::RunProg(LiquidCrystal lcd, int id, int leng, int amt) 
+void Menu::RunProg(LiquidCrystal& lcd, int id, int leng, int amt) 
 {
 	lcd.clear();
 	objects[1][0] = String(id)+"." + dlin + ":" + "0" + " " + iz + " " + String(leng);
@@ -69,20 +69,20 @@ void Menu::RunProg(LiquidCrystal lcd, int id, int leng, int amt)
 	curY = 0;
 }
 
-void Menu::StopProg(LiquidCrystal lcd)
+void Menu::StopProg(LiquidCrystal& lcd)
 {
 	lcd.clear();
 	curX = 2;
 	curY = 0;
 }
 
-void Menu::MenuMode(LiquidCrystal lcd) 
+void Menu::MenuMode(LiquidCrystal& lcd) 
 {
 	curX = 0;
 	curY = 0;
 }
 
-void Menu::Notification(LiquidCrystal lcd, int i)
+void Menu::Notification(LiquidCrystal& lcd, int i)
 {
 	lcd.clear();
 	lcd.setCursor(0, 0);
@@ -97,7 +97,7 @@ void Menu::Input(char ch)
 	}
 }
 
-void Menu::DelLast(LiquidCrystal lcd)
+void Menu::DelLast(LiquidCrystal& lcd)
 {
 	if (curY != 0 && objects[curX][curY].length() > 2)
 	{
@@ -106,35 +106,35 @@ void Menu::DelLast(LiquidCrystal lcd)
 	}
 }
 
-void Menu::PrintWord(LiquidCrystal lcd, char word, int x, int y)
+void Menu::PrintWord(LiquidCrystal& lcd, char word, int x, int y)
 {
 	lcd.setCursor(x, y);
 	lcd.print(word);
 }
 
-void Menu::PrintWord(LiquidCrystal lcd, String word, int x, int y)
+void Menu::PrintWord(LiquidCrystal& lcd, String word, int x, int y)
 {
 	lcd.setCursor(x, y);
 	lcd.print(word);
 }
 
-void Menu::Right(LiquidCrystal lcd)
+void Menu::Right(LiquidCrystal& lcd)
 {
 	lcd.scrollDisplayLeft();
 }
 
-void Menu::Left(LiquidCrystal lcd)
+void Menu::Left(LiquidCrystal& lcd)
 {
 	lcd.scrollDisplayRight();
 }
 
-void Menu::Down(LiquidCrystal lcd)
+void Menu::Down(LiquidCrystal& lcd)
 {
 	lcd.clear();
 	if (curY < maxY - 2) curY++;
 }
 
-void Menu::Up(LiquidCrystal lcd)
+void Menu::Up(LiquidCrystal& lcd)
 {
 	lcd.clear();
 	if (curY > 0) curY--;

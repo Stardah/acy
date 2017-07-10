@@ -1,5 +1,7 @@
 #include <LiquidCrystal.h>
 
+enum Menus { Main, Inp, Stop, Run };
+
 class Menu
 {
 public:
@@ -9,11 +11,11 @@ public:
 	void PrintWord(char word, int x, int y);
 	void PrintWord(String word, int x, int y);
 	void UpdateProgRaw(int id, int leng, int amt);
-	void InputProg() = delete;
+	void SetMenuMode(int newMenu);
+	void SetMenuMode(int newMenu, int id_y);
+	void ApplyInput(int id, int& leng, int& amt);
 	void DrawMenu();
 	void RunProg(int id, int leng, int amt); // Running menu switch
-	void StopProg(); // Stop menu switch
-	void MenuMode(); // Prog menu switch
 	void Notification(int i);
 	void Input(char word);
 	void DelLast();
@@ -21,15 +23,16 @@ public:
 	void Left();
 	void Up();
 	void Down();
+	void Toast(String str);
 	int getX() const;
 	int getY() const;
 
 private:
-	static const size_t maxX = 3;
+	static const size_t maxX = 4;
 	static const size_t maxY = 16;
 
 	LiquidCrystal lcd;
-	String items[maxX][maxY - 1];
+	String items[maxX][maxY];
 	int curX = 0;
 	int curY = 0;
 };

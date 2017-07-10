@@ -8,8 +8,6 @@ public:
 	Menu(const LiquidCrystal& lcdInit);
 	~Menu() = default;
 
-	void PrintWord(char word, int x, int y);
-	void PrintWord(String word, int x, int y);
 	void UpdateProgRaw(int id, int leng, int amt);
 	void SetMenuMode(int newMenu);
 	void SetMenuMode(int newMenu, int id_y);

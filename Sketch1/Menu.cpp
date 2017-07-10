@@ -93,9 +93,7 @@ Menu::Menu(const LiquidCrystal& lcdInit) :
 	}
 
 	// Menu curX = 0
-	items[0][0] = Sh+a+g+si+':';
-	items[0][1] = "1." + dlin + ":1234 " + kol + ":22";
-	items[0][2] = "2." + dlin + ":1234 " + kol + ":22";
+	//items[0][0] = Sh+a+g+si+':';
 	// Close curX = 2
 	items[2][0] = P+r+o+d+o+l+zh+si+t+smyagkiy+':'+' '+'#';
 	items[2][1] = M+e+n+u+':'+' '+'*';
@@ -109,7 +107,7 @@ Menu::Menu(const LiquidCrystal& lcdInit) :
 
 void Menu::UpdateProgRaw(int id, int leng, int amt)
 {
-	items[0][id + 1] = String(id) + "." + dlin + ":" + String(leng) + " " + kol + ":" + String(amt);
+	items[0][id] = String(id+1) + "." + dlin + ":" + String(leng) + " " + kol + ":" + String(amt);
 }
 
 void Menu::DrawMenu()
@@ -119,7 +117,7 @@ void Menu::DrawMenu()
 	{
 	case Main: // +'>' before selected line
 		lcd.setCursor(0, 0);
-		if (upside && curY!=0) str = ">";
+		if (upside) str = ">";
 		lcd.print(str+items[curX][curY]);
 		lcd.setCursor(0, 1);
 		str = "";
@@ -223,13 +221,16 @@ void Menu::ApplyInput(int id, int &leng, int &amt)
 	leng = items[3][0].substring(6).toInt();
 	amt = items[3][1].substring(5).toInt();
 	if (id > 15) id = 15;
-	items[0][id] = String(id-1)+"."+ 
+	items[0][id] = String(id+1)+"."+ 
 		dlin + ":"+ String(leng)+" " +
 		kol +  ":"+ String(amt);
 	items[3][0] = dlin+si+n+": ";
 	items[3][1] = kol + ": ";
 }
 
+///
+///
+///
 void Menu::Notification(int i)
 {
 	lcd.clear();
@@ -246,6 +247,9 @@ void Menu::Input(char cha)
 	
 }
 
+///
+/// Delete last symbol
+///
 void Menu::DelLast()
 {
 	if (upside && items[curX][curY].length() > 6) //"dlin: " - 6
@@ -258,18 +262,6 @@ void Menu::DelLast()
 		items[curX][curY+1] = items[curX][curY+1].substring(0, items[curX][curY+1].length() - 1);
 		lcd.clear();
 	}
-}
-
-void Menu::PrintWord(char word, int ix, int iy)
-{
-	lcd.setCursor(ix, iy);
-	lcd.print(word);
-}
-
-void Menu::PrintWord(String word, int ix, int iy)
-{
-	lcd.setCursor(ix, iy);
-	lcd.print(word);
 }
 
 void Menu::Right()

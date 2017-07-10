@@ -128,7 +128,7 @@ void MenuMode(char key)
 		menu.Left();
 		break;
 	case '#':
-		if (menu.getY() != 0 && !progRun)
+		if (!progRun)
 		{
 			input = true;
 			menu.SetMenuMode(Menus::Inp);

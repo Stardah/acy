@@ -83,10 +83,12 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ControlPins.h" />
     <ClInclude Include="Menu.h" />
     <ClInclude Include="__vm\.Sketch1.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ControlPins.cpp" />
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="ProgStruct.cpp" />
   </ItemGroup>

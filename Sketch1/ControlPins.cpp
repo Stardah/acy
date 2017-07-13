@@ -1,20 +1,20 @@
 #include "ControlPins.h"
 
+
 ControlPins::ControlPins()
 {
-	pinMode((uint8_t)pins::encoderB, INPUT);
-	pinMode((uint8_t)pins::forRev1, INPUT);
-	pinMode((uint8_t)pins::forRev2, INPUT);
-	pinMode((uint8_t)pins::handDrive1, INPUT);
-	pinMode((uint8_t)pins::handDrive2, INPUT);
-	pinMode((uint8_t)pins::emergency, INPUT);
-	pinMode((uint8_t)pins::knife, INPUT);
-	pinMode((uint8_t)pins::handAuto, INPUT);
-
-	pinMode((uint8_t)pins::gearForv, OUTPUT);
-	pinMode((uint8_t)pins::gearRev, OUTPUT);
-	pinMode((uint8_t)pins::gearSpeed, OUTPUT);
-	pinMode((uint8_t)pins::sound, OUTPUT);
+	pinMode((int)pins::encoderB, INPUT);
+	pinMode((int)pins::forRev1, INPUT);
+	pinMode((int)pins::forRev2, INPUT);
+	pinMode((int)pins::handDrive1, INPUT);
+	pinMode((int)pins::handDrive2, INPUT);
+	pinMode((int)pins::emergency, INPUT);
+	pinMode((int)pins::knife, INPUT);
+	pinMode((int)pins::handAuto, INPUT);
+	pinMode((int)pins::gearForv, OUTPUT);
+	pinMode((int)pins::gearRev, OUTPUT);
+	pinMode((int)pins::gearSpeed, OUTPUT);
+	pinMode((int)pins::sound, OUTPUT);
 }
 
 void ControlPins::Restart(bool forv, bool speed)
@@ -75,34 +75,6 @@ void ControlPins::UpdateInputs()
 	}
 	// end knife
 }
-
-///
-///Returns the number of pin by device name
-///
-int ControlPins::MapFunc(String name)
-{
-	if (name == "encoderA") return 0;
-	if (name == "encoderB") return 0;
-	if (name == "knife") return 0;
-	if (name == "casing") return 0;
-	if (name == "btnauto") return 0;
-	if (name == "engineRun") return 0;
-	if (name == "engineSide") return 0;
-	if (name == "engineSpeed") return 0;
-		return -1;
-}
-
-///
-///Sets the state of pin by device name and pin value
-///
-void ControlPins::SetPin(int num, byte value)
-{
-	if (value > 1) value = 1;
-	//int num = MapFunc(name);
-	digitalWrite(num, value);
-}
-
-
 
 ControlPins::~ControlPins()
 {

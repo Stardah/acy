@@ -1,6 +1,6 @@
 #include <LiquidCrystal.h>
 
-enum Menus { Main, Inp, Stop, Run, MenuInp };
+enum Menus { Main, Inp, Stop, Run, Service };
 
 class Menu
 {
@@ -8,14 +8,13 @@ public:
 	Menu(const LiquidCrystal& lcdInit);
 	~Menu() = default;
 
-	void UpdateProgRaw(int id, int leng, int amt);
+	void UpdateProgRaw(int leng, int amt);
 	void SetMenuMode(int newMenu);
-	void ApplyInput(int id, int& leng, int& amt);
+	void ApplyInput(int& leng, int& amt);
 	void DrawMenu();
-	void RunProg(int id, int leng, int amt); // Running menu switch
+	void RunProg(int leng, int amt); // Running menu switch
 	void Notification(int i);
 	void Input(char word);
-	void InputMenu(char word);
 	void DelLast();
 	void Right();
 	void Left();
@@ -27,7 +26,7 @@ public:
 
 private:
 	static const size_t maxX = 5;
-	static const size_t maxY = 16;
+	static const size_t maxY = 3;
 
 	LiquidCrystal lcd;
 	String items[maxX][maxY];

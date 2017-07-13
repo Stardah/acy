@@ -1,4 +1,5 @@
 #pragma once
+#include <Arduino.h>
 
 enum class pins { encoderA = 20, encoderB = 52, knife = 50, forRev1 = 48, forRev2 = 46,
 	handDrive1 = 44, handDrive2 = 42, emergency = 40, handAuto = 38, 
@@ -8,7 +9,6 @@ class ControlPins
 {
 public:
 	ControlPins();
-	void SetPin(int num, byte value);
 	static bool ReadPin(int num) 
 	{
 		return bool(digitalRead(num));
@@ -22,8 +22,6 @@ public:
 	void CheckButtons();
 	~ControlPins();
 private:
-
-	int MapFunc(String name);
 	//bool encoderA = false;
 	bool encoderB = false;
 	bool knife = false;

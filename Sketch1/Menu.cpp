@@ -1,6 +1,7 @@
 #include "Menu.h"
 #include <locale.h>
 
+
 #define A String('A')
 #define B String(char(160))
 #define V String('B')

@@ -1,25 +1,42 @@
 #include "ControlPins.h"
 
-ControlPins::ControlPins(byte pEncoderA, byte pEncoderB, byte pKnife, byte pCasing, byte pAuto, byte pEngineRun, byte pEngineSide, byte pEngineSpeed)
+ControlPins::ControlPins()
 {
+	pinMode((uint8_t)pins::encoderB, INPUT);
+	pinMode((uint8_t)pins::forRev1, INPUT);
+	pinMode((uint8_t)pins::forRev2, INPUT);
+	pinMode((uint8_t)pins::handDrive1, INPUT);
+	pinMode((uint8_t)pins::handDrive2, INPUT);
+	pinMode((uint8_t)pins::emergency, INPUT);
+	pinMode((uint8_t)pins::knife, INPUT);
+	pinMode((uint8_t)pins::handAuto, INPUT);
 
-	pinMode(pEncoderA, OUTPUT);
-	pinMode(pEncoderA, OUTPUT);
-	pinMode(pKnife, OUTPUT);
-	pinMode(pCasing, OUTPUT);
-	pinMode(pAuto, OUTPUT);
-	pinMode(pEngineRun, INPUT);
-	pinMode(pEngineSide, INPUT);
-	pinMode(pEngineSpeed, INPUT);
+	pinMode((uint8_t)pins::gearForv, OUTPUT);
+	pinMode((uint8_t)pins::gearRev, OUTPUT);
+	pinMode((uint8_t)pins::gearSpeed, OUTPUT);
+	pinMode((uint8_t)pins::sound, OUTPUT);
 }
 
-///
-///Returns the state of pin by device name
-///
-bool ControlPins::ReadPin(String name)
+void ControlPins::Restart(bool forv, bool speed)
 {
-	int num = MapFunc(name); // code needes exception here if -1
-	return bool(digitalRead(num));
+	knifeSwitch = false;
+	gearForv = forv;
+	gearSpeed = speed;
+}
+
+void ControlPins::RunGear(bool forv, bool speedUp)
+{
+	if (forv) digitalWrite((int)pins::gearForv, HIGH);
+	else digitalWrite((int)pins::gearRev, HIGH);
+	if (speedUp) digitalWrite((int)pins::gearSpeed, HIGH);
+	else digitalWrite((int)pins::gearSpeed, LOW);
+}
+
+void ControlPins::StopGear()
+{
+	digitalWrite((int)pins::gearForv, LOW);
+	digitalWrite((int)pins::gearRev, LOW);
+	digitalWrite((int)pins::gearSpeed, LOW);
 }
 
 ///
@@ -34,7 +51,29 @@ bool* ControlPins::ScanPins()
 
 void ControlPins::UpdateInputs()
 {
-	// Implement program reactions here;
+	encoderB   = ReadPin((int)pins::encoderB);
+	knife      = ReadPin((int)pins::knife);
+	forRev1    = ReadPin((int)pins::forRev1);
+	forRev2    = ReadPin((int)pins::forRev2);
+	handDrive1 = ReadPin((int)pins::handDrive1);
+	handDrive2 = ReadPin((int)pins::handDrive2);
+	emergency  = ReadPin((int)pins::emergency);
+	handAuto   = ReadPin((int)pins::handAuto);
+
+	// TODO: notifications
+	if (emergency) StopGear();
+	// Knife's up/fown mitions
+	if (!knife)
+	{
+		StopGear();
+		knifeSwitch = true;
+	}
+	if (knife && knifeSwitch)
+	{
+		knifeSwitch = false;
+		RunGear(gearForv, gearSpeed);
+	}
+	// end knife
 }
 
 ///
@@ -56,10 +95,10 @@ int ControlPins::MapFunc(String name)
 ///
 ///Sets the state of pin by device name and pin value
 ///
-void ControlPins::SetPin(String name, byte value)
+void ControlPins::SetPin(int num, byte value)
 {
 	if (value > 1) value = 1;
-	int num = MapFunc(name); // code needes exception here if -1
+	//int num = MapFunc(name);
 	digitalWrite(num, value);
 }
 

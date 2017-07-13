@@ -100,7 +100,6 @@ Menu::Menu(const LiquidCrystal& lcdInit) :
 	// Input curX = 3
 	items[3][0] = dlin + String(char(184)) + String(char(189)) + ": ";
 	items[3][1] = kol + ": ";
-	
 	// Print a message to the LCD.
 	lcd.print("  "+Z+a+g+r+y+z+k+a+"...");
 }
@@ -245,6 +244,14 @@ void Menu::Input(char cha)
 	if (!upside && items[curX][curY + 1].length() < 7)	 // "kol: " - 5 + 2 numbers
 		items[curX][curY+1] += cha;
 	
+}
+
+void Menu::InputMenu(char cha)
+{
+	if (upside && items[curX][curY].length() < 10)// "dlin: " - 6 + 4 numbers
+		items[curX][curY] += cha;
+	if (!upside && items[curX][curY + 1].length() < 7)	 // "kol: " - 5 + 2 numbers
+		items[curX][curY + 1] += cha;
 }
 
 ///

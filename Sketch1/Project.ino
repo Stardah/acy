@@ -1,6 +1,7 @@
 #include <Key.h>
 #include <Keypad.h>
 #include "Menu.h" 
+#include "ControlPins.h"
 #include "ProgStruct.cpp"
 #include <LiquidCrystal.h>
 
@@ -25,17 +26,15 @@ byte colPins[COLS] = { 2, 3, 4, 5 }; // Connect to the column pinouts of the key
 bool input = false;		// Menu or input
 bool progRun = false; // Access to write program
 bool stop = false; // stop menu
+long encoderCounter = 0; // mm counter
 
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
 Menu menu(lcd);
+ControlPins controlPins;
 
 PROG programs[16];
 int curProg = 0; // Current program id
-long encoderCounter = 0;
-
-int encoderStateWas = 0;
-int encoderStateNow = 0;
 
 void Addprog(int id, int leng, int amt)
 {
@@ -48,7 +47,7 @@ void Addprog(int id, int leng, int amt)
 void setup()
 {
 	lcd.begin(16, 2);
-	//Serial.begin(9600);
+	Serial.begin(9600);
 
 	for (int i = 0; i < 15; i++) {
 		programs[i].id = i;
@@ -56,11 +55,9 @@ void setup()
 		programs[i].amt = 22;
 		Addprog(programs[i].id, programs[i].leng, programs[i].amt);
 	}
-	pinMode(20, INPUT);
-	pinMode(52, INPUT);
 	menu.DrawMenu();
-	attachInterrupt(3, EncoderChange, FALLING);
-	//attachInterrupt(1, EncoderDec, CHANGE);
+
+	attachInterrupt((uint8_t)pins::encoderA, EncoderChange, FALLING);
 }
 
 void loop() 
@@ -167,7 +164,7 @@ void EncoderChange()
 {
 	if (encoderCounter > 10000) encoderCounter = 1000;
 	if (encoderCounter < -10000) encoderCounter = -1000;
-	if (digitalRead(52) == 1)
+	if (controlPins.ReadPin((int)pins::encoderB))
 	{
 		Serial.println("Encoder++");
 		encoderCounter++;
@@ -177,4 +174,4 @@ void EncoderChange()
 		Serial.println("Encoder--");
 		encoderCounter--;
 	}
-}
+};

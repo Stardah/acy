@@ -10,7 +10,6 @@ public:
 
 	void UpdateProgRaw(int id, int leng, int amt);
 	void SetMenuMode(int newMenu);
-	void SetMenuMode(int newMenu, int id_y);
 	void ApplyInput(int id, int& leng, int& amt);
 	void DrawMenu();
 	void RunProg(int id, int leng, int amt); // Running menu switch

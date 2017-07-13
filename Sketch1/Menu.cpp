@@ -186,35 +186,6 @@ void Menu::SetMenuMode(int newMenu)
 	}
 }
 
-
-void Menu::SetMenuMode(int newMenu, int id_y) 
-{
-	upside = true;
-	menuMode = Menus(newMenu);
-	switch (newMenu)	
-	{
-	case Main:
-		curX = 0;
-		curY = id_y;
-		break;
-	case Inp:
-		upside = true;
-		lcd.clear();
-		curX = 3;
-		curY = id_y;
-		break;
-	case Stop:
-		lcd.clear();
-		curX = 2;
-		curY = id_y;
-		break;
-	case Run:
-		break;
-	default:
-		break;
-	}
-}
-
 void Menu::ApplyInput(int id, int &leng, int &amt)
 {
 	leng = items[3][0].substring(6).toInt();

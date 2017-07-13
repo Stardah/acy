@@ -1,5 +1,7 @@
 #pragma once
 
+#include <assert.h>
+
 class ControlPins
 {
 public:
@@ -22,3 +24,19 @@ private:
 	bool stop = false;
 };
 
+///
+/// Перечисление для типа девайса
+///
+enum class PinType
+{
+	EncoderA,
+	EncoderA,
+	Knife,
+	Casing,
+	Auto,
+	EngineRun,
+	EngineSide,
+	EngineSpeed,
+	// Каждой ножке можно присвоить значение:
+	// Element = 30,
+};

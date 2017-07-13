@@ -1,5 +1,6 @@
 #include "ControlPins.h"
 
+// Здесь можно все параметры выкинуть и по перечислению устанавливать пины.
 ControlPins::ControlPins(byte pEncoderA, byte pEncoderB, byte pKnife, byte pCasing, byte pAuto, byte pEngineRun, byte pEngineSide, byte pEngineSpeed)
 {
 
@@ -18,6 +19,8 @@ ControlPins::ControlPins(byte pEncoderA, byte pEncoderB, byte pKnife, byte pCasi
 ///
 bool ControlPins::ReadPin(String name)
 {
+	// См. ControlPins::SetPin()
+	// Вместо херни со строковыми названиями используй перечисление PinType.
 	int num = MapFunc(name); // code needes exception here if -1
 	return bool(digitalRead(num));
 }
@@ -58,8 +61,28 @@ int ControlPins::MapFunc(String name)
 ///
 void ControlPins::SetPin(String name, byte value)
 {
-	if (value > 1) value = 1;
-	int num = MapFunc(name); // code needes exception here if -1
+	if (value > 1)
+		value = 1;
+	
+	int num;
+
+	/// Решение 1 (может не сработать, если эксепшны отключены):
+	// try
+	// {
+		num = MapFunc(name); // code needes exception here if -1
+
+	/* if (num == -1)
+	*  		throw String("Неверный пин");
+	*  }
+	*  catch (const String& msg)
+	*  {
+	*      // Твои действия здесь
+	*  }
+	*/
+
+	/// Решение 2 (без вывода):
+	// assert(num != -1);
+
 	digitalWrite(num, value);
 }
 

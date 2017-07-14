@@ -69,8 +69,6 @@
 #define u String(char(198))
 #define ya String(char(199))
 
-Menus menuMode = Menus::Inp;
-
 String dlin = D+l+si+n+": ";
 String kol = K+o+l+": ";
 String iz = I+z;
@@ -91,8 +89,6 @@ Menu::Menu(const LiquidCrystal& lcdInit) :
 		}
 	}
 
-	// Menu curX = 0
-	//items[0][0] = Sh+a+g+si+':';
 	// Close curX = 2
 	items[2][0] = P+r+o+d+o+l+zh+si+t+smyagkiy+':'+' '+'#';
 	items[2][1] = M+e+n+u+':'+' '+'*';
@@ -146,19 +142,6 @@ void Menu::DrawMenu()
 	}
 }
 
-/*
-inputs[0] = forRev1;
-inputs[1] = forRev2;
-inputs[2] = handDrive1;
-inputs[3] = handDrive2;
-inputs[4] = emergency;
-inputs[5] = ifAuto;
-inputs[6] = knife;
-inputs[7] = gearForv;
-inputs[8] = gearSpeed;
-inputs[9] = sound;
-*/
-
 String inp[12];
 void Menu::DrawService(int inputs[12], int encoderCounter)
 {
@@ -195,7 +178,7 @@ void Menu::RTUpdate(int curlength, int curparts)
 	{
 		lcd.clear();
 		items[1][1] = T + e + k + ": " + String(curlength);
-		for (int i = 0; i <= 4 - String(length).length(); i++)
+		for (int i = 0; i <= 4 - String(curlength).length(); i++)
 		{
 			items[1][1] += " ";
 		}

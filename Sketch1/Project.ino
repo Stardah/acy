@@ -32,6 +32,7 @@ ControlPins controlPins;
 PROG programs;
 int curProg = 0; // Current program id
 bool ServiceOn = false;
+Menus cash = Menus::Inp;
 int kostyl = 0;
 
 void Addprog(int leng, int amt)
@@ -51,19 +52,7 @@ void setup()
 	menu.DrawMenu();
 	lcd.cursor();
 	lcd.blink();
-	pinMode((int)pins::encoderB, INPUT);
-	pinMode((int)pins::forRev1, INPUT);
-	pinMode((int)pins::forRev2, INPUT);
-	pinMode((int)pins::handDrive1, INPUT);
-	pinMode((int)pins::handDrive2, INPUT);
-	pinMode((int)pins::emergency, INPUT);
-	pinMode((int)pins::knife, INPUT);
-	pinMode((int)pins::handAuto, INPUT);
 
-	pinMode((int)pins::gearForv, OUTPUT);
-	pinMode((int)pins::gearRev, OUTPUT);
-	pinMode((int)pins::gearSpeed, OUTPUT);
-	pinMode((int)pins::sound, OUTPUT);
 	attachInterrupt(3, EncoderChange, FALLING);
 }
 
@@ -95,7 +84,7 @@ void loop()
 		kostyl++;
 		if (kostyl > 2000) 
 		{
-			ServiceMode();
+			menu.DrawService(PinsUpdate(), encoderCounter);
 			kostyl = 0;
 		}
 	}
@@ -103,17 +92,23 @@ void loop()
 	{
 		if (key == 'D')  // Service
 		{
-			menu.SetMenuMode(Menus::Service);
 			ServiceOn = !ServiceOn;
 			if (!ServiceOn) 
 			{
-				menu.SetMenuMode(Menus::Inp);
+				if (cash == Menus::Run) menu.RunProg(programs.leng,programs.amt);
+				else menu.SetMenuMode(cash);
 				menu.DrawMenu();
+			}
+			else
+			{
+				cash = menu.getMenu();
+				menu.SetMenuMode(Menus::Service);
 			}
 		}
 		else
 		{
-			if (progRun) RunningMode(key);
+			if (ServiceOn) ServiceMode(key);
+			else if (progRun) RunningMode(key);
 			else if (stop) StopMode(key);
 			else MenuMode(key);
 			menu.DrawMenu();						// Update Menu
@@ -139,9 +134,19 @@ int* PinsUpdate()
 	return inputs;
 }
 
-void ServiceMode()
+void ServiceMode(char key)
 {
-	menu.DrawService(PinsUpdate(), encoderCounter);
+	switch (key)
+	{
+	case 'B':
+		menu.Up();
+		break;
+	case 'C':
+		menu.Down();
+		break;
+	default:
+		break;
+	}
 }
 
 void RunningMode(char key)
@@ -182,8 +187,6 @@ void MenuMode(char key)
 		break;
 	case '#':
 		menu.ApplyInput(programs.leng, programs.amt);
-		break;
-	case 'D':
 		break;
 	case 'B':
 		menu.Up();

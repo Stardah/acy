@@ -25,11 +25,14 @@ public:
 	void Toast(String str);
 	int getX() const;
 	int getY() const;
-
+	Menus getMenu() 
+	{
+		return menuMode;
+	}
 private:
 	static const size_t maxX = 5;
 	static const size_t maxY = 4;
-
+	Menus menuMode = Menus::Inp;
 	LiquidCrystal lcd;
 	String items[maxX][maxY];
 	int curX = 0;

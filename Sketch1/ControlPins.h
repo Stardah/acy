@@ -21,8 +21,8 @@ public:
 
 	int GetLength() 
 	{
-		if (knifeSwitch) return length;
-		else return encoderCounterRef-encoderLength;
+		//if (knifeSwitch) return length;
+		return encoderCounterRef-encoderLength;
 	};
 	int GetParts()
 	{
@@ -32,7 +32,7 @@ public:
 private:
 	void RunGear();
 	void StopGear();
-	void HandMode();
+	void HandMode(int& encoderCounter);
 	void AutoMod(int& encoderCounter);
 	// Hand 
 	bool forRev1 = false;

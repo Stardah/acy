@@ -14,10 +14,10 @@ public:
 		return bool(digitalRead(num));
 	};
 	void Reset();
-	void Start(long newlength, int newparts, int& encoderCounter);
+	void Start(long newlength, int newparts, int encoderCounter);
 	void Stop();
 	bool* ScanPins();
-	void UpdateInputs(int& encoderCounter);
+	void UpdateInputs(int encoderCounter);
 
 	int GetLength() 
 	{
@@ -32,8 +32,8 @@ public:
 private:
 	void RunGear();
 	void StopGear();
-	void HandMode(int& encoderCounter);
-	void AutoMod(int& encoderCounter);
+	void HandMode(int encoderCounter);
+	void AutoMod(int encoderCounter);
 	// Hand 
 	bool forRev1 = false;
 	bool forRev2 = false;

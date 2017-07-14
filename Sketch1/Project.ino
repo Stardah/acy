@@ -22,7 +22,8 @@ byte colPins[COLS] = { 2, 3, 4, 5 }; // Connect to the column pinouts of the key
 bool input = false;		// Menu or input
 bool progRun = false; // Access to write program
 bool stop = false; // stop menu
-int encoderCounter = 0; // mm counter
+volatile int encoderCounter = 0; // mm counter
+volatile bool encoderB = false;
 
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
@@ -45,7 +46,7 @@ void Addprog(int leng, int amt)
 void setup()
 {
 	lcd.begin(16, 2);
-	Serial.begin(9600);
+	//Serial.begin(9600);
 
 	Addprog(2, 5); // recover previous prog
 
@@ -151,6 +152,7 @@ void ServiceMode(char key)
 
 void RunningMode(char key)
 {
+	encoderB = (bool)digitalRead((int)pins::encoderB);
 	if (key == 'A') {
 		progRun = false;
 		stop = true;
@@ -162,18 +164,21 @@ void StopMode(char key)
 {
 	if (stop)
 	{
-		if (key == '#')
+		if (key == '#') // Продолжаем
 		{
-			menu.RunProg(programs.leng, programs.amt);
+			menu.RunProg(controlPins.GetLength(), controlPins.GetParts());
+			progRun = true;
 			stop = false;
 			progRun = true;
 		}
-		else if (key == '*')
+		else if (key == '*') // Стоп
 		{
 			menu.SetMenuMode(Menus::Inp);;
 			lcd.cursor();
 			lcd.blink();
 			stop = false;
+			controlPins.Stop();
+			controlPins.Reset();
 		}
 	}
 }
@@ -210,16 +215,16 @@ void MenuMode(char key)
 
 void EncoderChange()
 {
-	if (encoderCounter > 10000) encoderCounter = 1000;
-	if (encoderCounter < -10000) encoderCounter = -1000;
-	if (controlPins.ReadPin((int)pins::encoderB))
+	//if (encoderCounter > 100000) encoderCounter = 1000;
+	//if (encoderCounter < -100000) encoderCounter = -1000;
+	if ((bool)digitalRead(52))
 	{
-		Serial.println("Encoder++");
+		//Serial.println("Encoder++");
 		encoderCounter++;
 	}
 	else
 	{
-		Serial.println("Encoder--");
+		//Serial.println("Encoder--");
 		encoderCounter--;
 	}
 };

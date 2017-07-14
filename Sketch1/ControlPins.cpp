@@ -33,7 +33,7 @@ void ControlPins::Reset()
 ///
 /// Initialize variables
 ///
-void ControlPins::Start(long newlength, int newparts, int& encoderCounter)
+void ControlPins::Start(long newlength, int newparts, int encoderCounter)
 {
 	length = newlength;
 	parts = newparts;
@@ -105,7 +105,7 @@ bool* ControlPins::ScanPins()
 ///
 /// update states for all pins and do doings
 ///
-void ControlPins::UpdateInputs(int& encoderCounter)
+void ControlPins::UpdateInputs(int encoderCounter)
 {
 	knife      = !ReadPin((int)pins::knife);
 	forRev1    = ReadPin((int)pins::forRev1);
@@ -124,10 +124,6 @@ void ControlPins::UpdateInputs(int& encoderCounter)
 		StopGear();
 	}
 
-	if (knife) 
-	{
-		StopGear();
-	}
 
 	if (runOn && ifAuto) AutoMod(encoderCounter);
 	else if (!ifAuto) HandMode(encoderCounter);
@@ -137,7 +133,7 @@ void ControlPins::UpdateInputs(int& encoderCounter)
 ///
 /// When emploee controls the process himself
 ///
-void ControlPins::HandMode(int& encoderCounter)
+void ControlPins::HandMode(int encoderCounter)
 {
 	if (knife) encoderLength = encoderCounter;
 	if (handDrive1 && handDrive2) // if both then stop
@@ -150,7 +146,7 @@ void ControlPins::HandMode(int& encoderCounter)
 ///
 /// When controller controls the process
 ///
-void ControlPins::AutoMod(int& encoderCounter)
+void ControlPins::AutoMod(int encoderCounter)
 {
 	// Knife's up/down motions
 	if (knife && knifeSwitch)
@@ -170,6 +166,7 @@ void ControlPins::AutoMod(int& encoderCounter)
 			knifeSwitch = true;				// wait for cut
 		}
 	if (parts == encoderParts) Stop(); // If all parts done stop process
+	if (knife && ((encoderCounter - encoderLength)>1)) StopGear();
 }
 
 ControlPins::~ControlPins()

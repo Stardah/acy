@@ -22,7 +22,7 @@ byte colPins[COLS] = { 2, 3, 4, 5 }; // Connect to the column pinouts of the key
 bool input = false;		// Menu or input
 bool progRun = false; // Access to write program
 bool stop = false; // stop menu
-long encoderCounter = 0; // mm counter
+int encoderCounter = 0; // mm counter
 
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
@@ -55,13 +55,14 @@ void setup()
 
 void loop() 
 {
-	char key = keypad.getKey();
+	controlPins.UpdateInputs(encoderCounter);	// Update Gear
+	char key = keypad.getKey();					// Update Input
 	if (key != NO_KEY) 
 	{
 		if (progRun) RunningMode(key);
 		else if (stop) StopMode(key);
 		else MenuMode(key);
-		menu.DrawMenu();
+		menu.DrawMenu();						// Update Menu
 	}
 }
 
@@ -72,6 +73,7 @@ void RunningMode(char key)
 		stop = true;
 		menu.SetMenuMode(Menus::Stop);
 	}
+	menu.RTUpdate(controlPins.GetLength(), controlPins.GetParts()); // Display current values
 }
 
 void StopMode(char key) 

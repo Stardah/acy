@@ -12,6 +12,7 @@ public:
 	void SetMenuMode(int newMenu);
 	void ApplyInput(int& leng, int& amt);
 	void DrawMenu();
+	void RTUpdate(int length, int parts); // To display current length and parts
 	void RunProg(int leng, int amt); // Running menu switch
 	void Notification(int i);
 	void Input(char word);
@@ -32,4 +33,8 @@ private:
 	String items[maxX][maxY];
 	int curX = 0;
 	int curY = 0;
+	bool upside = true;
+	//const String notification[] = { "УП записана","Ожидание резки","УП выполнена", "Ошибка" };
+	int length = 0;
+	int parts = 0;
 };

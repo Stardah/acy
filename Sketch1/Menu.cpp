@@ -71,11 +71,9 @@
 
 Menus menuMode = Menus::Inp;
 
-const String notification[] = { "УП записана","Ожидание резки","УП выполнена", "Ошибка" };
 String dlin = D+l+si+n+": ";
 String kol = K+o+l+": ";
 String iz = I+z;
-bool upside = true;
 
 Menu::Menu(const LiquidCrystal& lcdInit) :
 	lcd(lcdInit)
@@ -146,6 +144,20 @@ void Menu::DrawMenu()
 	}
 }
 
+void Menu::RTUpdate(int curlength, int curparts)
+{
+	if (curX == 1) 
+	{
+		lcd.clear();
+		items[1][1] = T + e + k + ": " + String(curlength);
+		for (int i = 0; i <= 4 - String(length).length(); i++)
+		{
+			items[1][1] += " ";
+		}
+		items[1][1] += T + e + k + ":" + String(curparts);
+	}
+}
+
 void Menu::RunProg(int leng, int amt) 
 {
 	lcd.clear();
@@ -193,6 +205,8 @@ void Menu::ApplyInput(int &leng, int &amt)
 {
 	leng = items[0][0].substring(6).toInt();
 	amt = items[0][1].substring(5).toInt();
+	length = leng;	// Set length
+	parts = amt;	// Set parts
 }
 
 ///
@@ -202,7 +216,7 @@ void Menu::Notification(int i)
 {
 	lcd.clear();
 	lcd.setCursor(0, 0);
-	lcd.print(notification[i]);
+	//lcd.print(notification[i]);
 }
 
 void Menu::Input(char cha)

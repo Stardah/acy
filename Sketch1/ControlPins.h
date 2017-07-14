@@ -14,28 +14,47 @@ public:
 		return bool(digitalRead(num));
 	};
 	void Restart(bool forv, bool speed);
-	void RunGear(bool forv, bool speedUp);
+	void Start(long newlength, int newparts, int& encoderCounter);
+	void Stop();
+	void RunGear();
 	void StopGear();
 	bool* ScanPins();
-	void UpdateInputs();
-	void CheckForStop();
-	void CheckButtons();
+	void UpdateInputs(int& encoderCounter);
+	void HandMode();
+	void AutoMod(int& encoderCounter);
+	int GetLength() 
+	{
+		return encoderLength;
+	};
+	int GetParts()
+	{
+		return encoderParts;
+	};
 	~ControlPins();
 private:
-	//bool encoderA = false;
-	bool encoderB = false;
-	bool knife = false;
+	// Hand 
 	bool forRev1 = false;
 	bool forRev2 = false;
 	bool handDrive1 = false;
 	bool handDrive2 = false;
+	// All
 	bool emergency = false;
-	bool handAuto = false;
-	bool gearForv = false;
-	bool gearSpeed = false;
-	bool sound = false;
+	bool encoderA = false; 
+	bool encoderB = false;
+	// Auto
+	bool ifAuto = false;		
+	bool gearForv = false;	// out
+	bool gearSpeed = true;	// out
+	bool sound = false;		// out
+	bool knife = false;
 
 	bool knifeSwitch = false;
+	bool runOn = false;
 	//long encoderCounter = 0; // mm counter
+	int encoderCount;
+	int encoderLength = 0;
+	int encoderParts = 0;
+	int length = 0;
+	int parts = 0;
 };
 

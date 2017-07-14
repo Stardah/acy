@@ -11,6 +11,7 @@ ControlPins::ControlPins()
 	pinMode((int)pins::emergency, INPUT);
 	pinMode((int)pins::knife, INPUT);
 	pinMode((int)pins::handAuto, INPUT);
+
 	pinMode((int)pins::gearForv, OUTPUT);
 	pinMode((int)pins::gearRev, OUTPUT);
 	pinMode((int)pins::gearSpeed, OUTPUT);
@@ -24,11 +25,27 @@ void ControlPins::Restart(bool forv, bool speed)
 	gearSpeed = speed;
 }
 
-void ControlPins::RunGear(bool forv, bool speedUp)
+void ControlPins::Start(long newlength, int newparts, int& encoderCounter)
 {
-	if (forv) digitalWrite((int)pins::gearForv, HIGH);
+	length = newlength;
+	parts = newparts;
+	runOn = true;
+	encoderLength = encoderCounter; // set init conter to current length
+}
+
+void ControlPins::Stop()
+{
+	length = 0;
+	parts = 0;
+	runOn = false;
+	gearSpeed = true;
+}
+
+void ControlPins::RunGear()
+{
+	if (forRev1 || forRev2) digitalWrite((int)pins::gearForv, HIGH);
 	else digitalWrite((int)pins::gearRev, HIGH);
-	if (speedUp) digitalWrite((int)pins::gearSpeed, HIGH);
+	if (gearSpeed) digitalWrite((int)pins::gearSpeed, HIGH);
 	else digitalWrite((int)pins::gearSpeed, LOW);
 }
 
@@ -49,31 +66,54 @@ bool* ControlPins::ScanPins()
 	return  scan;
 }
 
-void ControlPins::UpdateInputs()
+void ControlPins::UpdateInputs(int& encoderCounter)
 {
-	encoderB   = ReadPin((int)pins::encoderB);
 	knife      = ReadPin((int)pins::knife);
 	forRev1    = ReadPin((int)pins::forRev1);
 	forRev2    = ReadPin((int)pins::forRev2);
 	handDrive1 = ReadPin((int)pins::handDrive1);
 	handDrive2 = ReadPin((int)pins::handDrive2);
 	emergency  = ReadPin((int)pins::emergency);
-	handAuto   = ReadPin((int)pins::handAuto);
+	ifAuto     = ReadPin((int)pins::handAuto);
 
 	// TODO: notifications
 	if (emergency) StopGear();
-	// Knife's up/fown mitions
+
+	if (runOn) AutoMod(encoderCounter);
+	else HandMode();
+
+}
+
+void ControlPins::HandMode()
+{
+	if (handDrive1 && handDrive2 || forRev1 && forRev2) // if both then stop
+		StopGear(); 
+	else if ((handDrive1 || handDrive2) && (forRev1 || forRev2)) // if presed move then move 
+		RunGear(); 
+	else StopGear(); 									// if not move then stop								
+}
+
+void ControlPins::AutoMod(int& encoderCounter)
+{
+	// Knife's up/down motions
 	if (!knife)
 	{
-		StopGear();
 		knifeSwitch = true;
 	}
 	if (knife && knifeSwitch)
 	{
 		knifeSwitch = false;
-		RunGear(gearForv, gearSpeed);
+		encoderParts++; // + 1 part
+		if (parts != encoderParts) RunGear();
 	}
 	// end knife
+	if (encoderCounter - encoderLength > length) // It's time to cut
+	{
+		StopGear();						// stop gear
+		knifeSwitch = true;				// wait for cut
+		encoderLength = encoderCounter; // update length
+	}
+	if (parts == encoderParts) Stop(); // If all parts done stop process
 }
 
 ControlPins::~ControlPins()

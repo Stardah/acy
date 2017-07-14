@@ -1,7 +1,6 @@
 #pragma once
 #include <Arduino.h>
 
-#include <assert.h>
 enum class pins { encoderA = 20, encoderB = 52, knife = 50, forRev1 = 48, forRev2 = 46,
 	handDrive1 = 44, handDrive2 = 42, emergency = 40, handAuto = 38, 
 	gearRev = 22, gearForv = 24, gearSpeed = 23, sound = 25};
@@ -59,19 +58,3 @@ private:
 	int parts = 0;
 };
 
-///
-/// ������������ ��� ���� �������
-///
-enum class PinType
-{
-	EncoderA,
-	EncoderA,
-	Knife,
-	Casing,
-	Auto,
-	EngineRun,
-	EngineSide,
-	EngineSpeed,
-	// ������ ����� ����� ��������� ��������:
-	// Element = 30,
-};

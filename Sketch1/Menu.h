@@ -1,5 +1,3 @@
-#pragma once
-
 #include <LiquidCrystal.h>
 
 enum Menus { Main, Inp, Stop, Run, Service };

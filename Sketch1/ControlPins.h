@@ -1,4 +1,5 @@
 #pragma once
+#include <Arduino.h>
 
 #include <assert.h>
 enum class pins { encoderA = 20, encoderB = 52, knife = 50, forRev1 = 48, forRev2 = 46,
@@ -9,37 +10,53 @@ class ControlPins
 {
 public:
 	ControlPins();
-	void SetPin(int num, byte value);
 	static bool ReadPin(int num) 
 	{
 		return bool(digitalRead(num));
 	};
-	void Restart(bool forv, bool speed);
-	void RunGear(bool forv, bool speedUp);
-	void StopGear();
+	void Reset();
+	void Start(long newlength, int newparts, int& encoderCounter);
+	void Stop();
 	bool* ScanPins();
-	void UpdateInputs();
-	void CheckForStop();
-	void CheckButtons();
+	void UpdateInputs(int& encoderCounter);
+
+	int GetLength() 
+	{
+		//if (knifeSwitch) return length;
+		return encoderCounterRef-encoderLength;
+	};
+	int GetParts()
+	{
+		return encoderParts;
+	};
 	~ControlPins();
 private:
-
-	int MapFunc(String name);
-	//bool encoderA = false;
-	bool encoderB = false;
-	bool knife = false;
+	void RunGear();
+	void StopGear();
+	void HandMode(int& encoderCounter);
+	void AutoMod(int& encoderCounter);
+	// Hand 
 	bool forRev1 = false;
 	bool forRev2 = false;
 	bool handDrive1 = false;
 	bool handDrive2 = false;
+	// All
 	bool emergency = false;
-	bool handAuto = false;
-	bool gearForv = false;
-	bool gearSpeed = false;
-	bool sound = false;
+	// Auto
+	bool ifAuto = false;		
+	bool gearForv = true;	// out
+	bool gearSpeed = true;	// out
+	bool sound = false;		// out
+	bool knife = false;
 
 	bool knifeSwitch = false;
+	bool runOn = false;
 	//long encoderCounter = 0; // mm counter
+	int encoderLength = 0;
+	int encoderParts = 0;
+	int encoderCounterRef;
+	int length = 0;
+	int parts = 0;
 };
 
 ///

@@ -75,6 +75,7 @@ String dlin = D+l+si+n+": ";
 String kol = K+o+l+": ";
 String iz = I+z;
 
+
 Menu::Menu(const LiquidCrystal& lcdInit) :
 	lcd(lcdInit)
 {
@@ -105,12 +106,12 @@ void Menu::UpdateProgRaw(int leng, int amt)
 	items[0][1] = kol + String(amt);
 }
 
+String str = "";
 void Menu::DrawMenu()
 {
-	String str = "";
 	switch (menuMode)
 	{
-	case Service: // +'>' before selected line
+	/*case Service: // +'>' before selected line
 		lcd.setCursor(0, 0);
 		if (upside) str = ">";
 		lcd.print(str+items[curX][curY]);
@@ -119,6 +120,7 @@ void Menu::DrawMenu()
 		if (!upside) str = ">";
 		lcd.print(str+items[curX][curY + 1]);
 		break;
+		*/
 	case Inp: // cursor after selected line
 		if (upside) 
 		{
@@ -142,6 +144,49 @@ void Menu::DrawMenu()
 		lcd.print(items[curX][curY + 1]);
 		break;
 	}
+}
+
+/*
+inputs[0] = forRev1;
+inputs[1] = forRev2;
+inputs[2] = handDrive1;
+inputs[3] = handDrive2;
+inputs[4] = emergency;
+inputs[5] = ifAuto;
+inputs[6] = knife;
+inputs[7] = gearForv;
+inputs[8] = gearSpeed;
+inputs[9] = sound;
+*/
+
+String inp[12];
+void Menu::DrawService(int inputs[12], int encoderCounter)
+{
+	
+	for(int i =0; i< 12; i++)
+		if (inputs[i]==1) inp[i] = "1"; 
+		else inp[i] = "0";
+	
+	items[3][0]=
+		"FR1" + inp[0] +
+		" FR2" +inp[1] +// 9 
+		" HD1" +inp[2]; // 14
+	items[3][1]=
+		"HD2" + inp[3] + // 4
+		" EM" + inp[4] + // 8
+		" AU" + inp[5] + // 12
+		" KN" + String(inputs[6]); // 16
+	items[3][2]=
+		"GF"  + inp[7] +// 3
+		" GS" + inp[8] +// 7
+		" SO" + inp[9] +// 11
+		" E" + inp[10]+ inp[11]; // 15
+	items[3][3] = String(encoderCounter);
+	lcd.clear();
+	lcd.setCursor(0, 0);
+	lcd.print(items[3][curY]);
+	lcd.setCursor(0, 1);
+	lcd.print(items[3][curY + 1]);
 }
 
 void Menu::RTUpdate(int curlength, int curparts)
@@ -193,6 +238,9 @@ void Menu::SetMenuMode(int newMenu)
 		curY = 0;
 		break;
 	case Service:
+		lcd.clear();
+		curX = 3;
+		curY = 0;
 		break;
 	case Run:
 		break;
@@ -258,8 +306,8 @@ void Menu::Down()
 {
 	lcd.clear();
 	if (upside) upside = !upside;
-		else if (menuMode != Menus::Main)
-			if (curY < maxY - 2)
+		else if (menuMode == Menus::Service)
+			if (curY < maxY - 1)
 				++curY;
 }
 

@@ -12,6 +12,7 @@ public:
 	void SetMenuMode(int newMenu);
 	void ApplyInput(int& leng, int& amt);
 	void DrawMenu();
+	void DrawService(int inputs[12], int encoderCounter);
 	void RTUpdate(int length, int parts); // To display current length and parts
 	void RunProg(int leng, int amt); // Running menu switch
 	void Notification(int i);
@@ -27,7 +28,7 @@ public:
 
 private:
 	static const size_t maxX = 5;
-	static const size_t maxY = 3;
+	static const size_t maxY = 4;
 
 	LiquidCrystal lcd;
 	String items[maxX][maxY];

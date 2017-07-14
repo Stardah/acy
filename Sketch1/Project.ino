@@ -31,6 +31,8 @@ ControlPins controlPins;
 
 PROG programs;
 int curProg = 0; // Current program id
+bool ServiceOn = false;
+int kostyl = 0;
 
 void Addprog(int leng, int amt)
 {
@@ -44,26 +46,102 @@ void setup()
 	lcd.begin(16, 2);
 	Serial.begin(9600);
 
-	Addprog(0, 0); // recover previous prog
+	Addprog(2, 5); // recover previous prog
 
 	menu.DrawMenu();
 	lcd.cursor();
 	lcd.blink();
+	pinMode((int)pins::encoderB, INPUT);
+	pinMode((int)pins::forRev1, INPUT);
+	pinMode((int)pins::forRev2, INPUT);
+	pinMode((int)pins::handDrive1, INPUT);
+	pinMode((int)pins::handDrive2, INPUT);
+	pinMode((int)pins::emergency, INPUT);
+	pinMode((int)pins::knife, INPUT);
+	pinMode((int)pins::handAuto, INPUT);
 
-	attachInterrupt((uint8_t)pins::encoderA, EncoderChange, FALLING);
+	pinMode((int)pins::gearForv, OUTPUT);
+	pinMode((int)pins::gearRev, OUTPUT);
+	pinMode((int)pins::gearSpeed, OUTPUT);
+	pinMode((int)pins::sound, OUTPUT);
+	attachInterrupt(3, EncoderChange, FALLING);
 }
 
 void loop() 
 {
 	controlPins.UpdateInputs(encoderCounter);	// Update Gear
+	if (progRun)
+	{
+		kostyl++;
+		if (kostyl > 4000)
+		{
+			menu.RTUpdate(controlPins.GetLength(), controlPins.GetParts()); // Display current values
+			menu.DrawMenu();
+			kostyl = 0;
+			if (controlPins.GetParts() == programs.amt) 
+			{
+				menu.SetMenuMode(Menus::Inp);
+				progRun = false;
+				lcd.cursor();
+				lcd.blink();
+				menu.DrawMenu();
+				controlPins.Reset();
+			}
+		}
+	}
 	char key = keypad.getKey();					// Update Input
+	if (ServiceOn)
+	{
+		kostyl++;
+		if (kostyl > 2000) 
+		{
+			ServiceMode();
+			kostyl = 0;
+		}
+	}
 	if (key != NO_KEY) 
 	{
-		if (progRun) RunningMode(key);
-		else if (stop) StopMode(key);
-		else MenuMode(key);
-		menu.DrawMenu();						// Update Menu
+		if (key == 'D')  // Service
+		{
+			menu.SetMenuMode(Menus::Service);
+			ServiceOn = !ServiceOn;
+			if (!ServiceOn) 
+			{
+				menu.SetMenuMode(Menus::Inp);
+				menu.DrawMenu();
+			}
+		}
+		else
+		{
+			if (progRun) RunningMode(key);
+			else if (stop) StopMode(key);
+			else MenuMode(key);
+			menu.DrawMenu();						// Update Menu
+		}
 	}
+}
+int inputs[12];
+
+int* PinsUpdate() 
+{
+	inputs[0] = digitalRead((int)pins::forRev1);
+	inputs[1] = digitalRead((int)pins::forRev2);
+	inputs[2] = digitalRead((int)pins::handDrive1);
+	inputs[3] = digitalRead((int)pins::handDrive2);
+	inputs[4] = digitalRead((int)pins::emergency);
+	inputs[5] = digitalRead((int)pins::handAuto);
+	inputs[6] = digitalRead((int)pins::knife);
+	inputs[7] = digitalRead((int)pins::gearForv);
+	inputs[8] = digitalRead((int)pins::gearSpeed);
+	inputs[9] = digitalRead((int)pins::sound);
+	inputs[10] =digitalRead((int)pins::encoderA);
+	inputs[11] =digitalRead((int)pins::encoderB);
+	return inputs;
+}
+
+void ServiceMode()
+{
+	menu.DrawService(PinsUpdate(), encoderCounter);
 }
 
 void RunningMode(char key)
@@ -73,7 +151,6 @@ void RunningMode(char key)
 		stop = true;
 		menu.SetMenuMode(Menus::Stop);
 	}
-	menu.RTUpdate(controlPins.GetLength(), controlPins.GetParts()); // Display current values
 }
 
 void StopMode(char key) 
@@ -118,9 +195,8 @@ void MenuMode(char key)
 		menu.ApplyInput(programs.leng, programs.amt);
 		lcd.noCursor();
 		lcd.noBlink();
-			
+		controlPins.Start(programs.leng, programs.amt, encoderCounter);
 		progRun = true;
-		curProg = 0;
 		menu.RunProg(programs.leng, programs.amt);
 		break;
 	default:

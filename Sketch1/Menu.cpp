@@ -69,13 +69,10 @@
 #define u String(char(198))
 #define ya String(char(199))
 
-Menus menuMode = Menus::Main;
-
-const String notification[] = { "УП записана","Ожидание резки","УП выполнена", "Ошибка" };
-String dlin = D+l;
-String kol = K+o+l;
+String dlin = D+l+si+n+": ";
+String kol = K+o+l+": ";
 String iz = I+z;
-bool upside = true;
+
 
 Menu::Menu(const LiquidCrystal& lcdInit) :
 	lcd(lcdInit)
@@ -92,29 +89,25 @@ Menu::Menu(const LiquidCrystal& lcdInit) :
 		}
 	}
 
-	// Menu curX = 0
-	//items[0][0] = Sh+a+g+si+':';
 	// Close curX = 2
 	items[2][0] = P+r+o+d+o+l+zh+si+t+smyagkiy+':'+' '+'#';
 	items[2][1] = M+e+n+u+':'+' '+'*';
-	// Input curX = 3
-	items[3][0] = dlin + String(char(184)) + String(char(189)) + ": ";
-	items[3][1] = kol + ": ";
 	// Print a message to the LCD.
 	lcd.print("  "+Z+a+g+r+y+z+k+a+"...");
 }
 
-void Menu::UpdateProgRaw(int id, int leng, int amt)
+void Menu::UpdateProgRaw(int leng, int amt)
 {
-	items[0][id] = String(id+1) + "." + dlin + ":" + String(leng) + " " + kol + ":" + String(amt);
+	items[0][0] = dlin + String(leng);
+	items[0][1] = kol + String(amt);
 }
 
+String str = "";
 void Menu::DrawMenu()
 {
-	String str = "";
 	switch (menuMode)
 	{
-	case Main: // +'>' before selected line
+	/*case Service: // +'>' before selected line
 		lcd.setCursor(0, 0);
 		if (upside) str = ">";
 		lcd.print(str+items[curX][curY]);
@@ -123,6 +116,7 @@ void Menu::DrawMenu()
 		if (!upside) str = ">";
 		lcd.print(str+items[curX][curY + 1]);
 		break;
+		*/
 	case Inp: // cursor after selected line
 		if (upside) 
 		{
@@ -148,11 +142,62 @@ void Menu::DrawMenu()
 	}
 }
 
-void Menu::RunProg(int id, int leng, int amt) 
+String inp[12];
+void Menu::DrawService(int inputs[12], int encoderCounter)
+{
+	
+	for(int i =0; i< 12; i++)
+		if (inputs[i]==1) inp[i] = "1"; 
+		else inp[i] = "0";
+	
+	items[3][0]=
+		"FR1" + inp[0] +
+		" FR2" +inp[1] +// 9 
+		" HD1" +inp[2]; // 14
+	items[3][1]=
+		"HD2" + inp[3] + // 4
+		" EM" + inp[4] + // 8
+		" AU" + inp[5] + // 12
+		" KN" + String(inputs[6]); // 16
+	items[3][2]=
+		"GF"  + inp[7] +// 3
+		" GS" + inp[8] +// 7
+		" SO" + inp[9] +// 11
+		" E" + inp[10]+ inp[11]; // 15
+	items[3][3] = String(encoderCounter);
+	lcd.clear();
+	lcd.setCursor(0, 0);
+	lcd.print(items[3][curY]);
+	lcd.setCursor(0, 1);
+	lcd.print(items[3][curY + 1]);
+}
+
+void Menu::RTUpdate(int curlength, int curparts)
+{
+	if (curX == 1) 
+	{
+		lcd.clear();
+		items[1][1] = T + e + k + ": " + String(curlength);
+		for (int i = 0; i <= 4 - String(curlength).length(); i++)
+		{
+			items[1][1] += " ";
+		}
+		items[1][1] += T + e + k + ":" + String(curparts);
+	}
+}
+
+void Menu::RunProg(int leng, int amt) 
 {
 	lcd.clear();
-	items[1][0] = String(id) + "." + dlin + ":" + "0" + " " + iz + " " + String(leng);
-	items[1][1] = kol + ":" + "0" + " " + iz + " " + String(amt);
+	items[1][0] = D + l + si + n + ":" + String(leng);
+	items[1][1] = T + e + k + ": " + "0";
+	for (int i = 0; i <= 4 - String(leng).length(); i++)
+	{
+		items[1][0] += " ";
+		items[1][1] += " ";
+	}
+	items[1][0]	+= K+o+l+":"+ String(amt);
+	items[1][1] += T + e + k + ":"+"0";
 	curX = 1;
 	curY = 0;
 	menuMode = Menus::Run;
@@ -164,19 +209,20 @@ void Menu::SetMenuMode(int newMenu)
 	menuMode = Menus(newMenu);
 	switch (newMenu)
 	{
-	case Main:
-		curX = 0;
-		curY = 0;
-		break;
 	case Inp:
 		upside = true;
 		lcd.clear();
-		curX = 3;
+		curX = 0;
 		curY = 0;
 		break;
 	case Stop:
 		lcd.clear();
 		curX = 2;
+		curY = 0;
+		break;
+	case Service:
+		lcd.clear();
+		curX = 3;
 		curY = 0;
 		break;
 	case Run:
@@ -186,45 +232,12 @@ void Menu::SetMenuMode(int newMenu)
 	}
 }
 
-
-void Menu::SetMenuMode(int newMenu, int id_y) 
+void Menu::ApplyInput(int &leng, int &amt)
 {
-	upside = true;
-	menuMode = Menus(newMenu);
-	switch (newMenu)	
-	{
-	case Main:
-		curX = 0;
-		curY = id_y;
-		break;
-	case Inp:
-		upside = true;
-		lcd.clear();
-		curX = 3;
-		curY = id_y;
-		break;
-	case Stop:
-		lcd.clear();
-		curX = 2;
-		curY = id_y;
-		break;
-	case Run:
-		break;
-	default:
-		break;
-	}
-}
-
-void Menu::ApplyInput(int id, int &leng, int &amt)
-{
-	leng = items[3][0].substring(6).toInt();
-	amt = items[3][1].substring(5).toInt();
-	if (id > 15) id = 15;
-	items[0][id] = String(id+1)+"."+ 
-		dlin + ":"+ String(leng)+" " +
-		kol +  ":"+ String(amt);
-	items[3][0] = dlin+si+n+": ";
-	items[3][1] = kol + ": ";
+	leng = items[0][0].substring(6).toInt();
+	amt = items[0][1].substring(5).toInt();
+	length = leng;	// Set length
+	parts = amt;	// Set parts
 }
 
 ///
@@ -234,7 +247,7 @@ void Menu::Notification(int i)
 {
 	lcd.clear();
 	lcd.setCursor(0, 0);
-	lcd.print(notification[i]);
+	//lcd.print(notification[i]);
 }
 
 void Menu::Input(char cha)
@@ -242,16 +255,7 @@ void Menu::Input(char cha)
 	if (upside && items[curX][curY].length() < 10 )// "dlin: " - 6 + 4 numbers
 		items[curX][curY] += cha;
 	if (!upside && items[curX][curY + 1].length() < 7)	 // "kol: " - 5 + 2 numbers
-		items[curX][curY+1] += cha;
-	
-}
-
-void Menu::InputMenu(char cha)
-{
-	if (upside && items[curX][curY].length() < 10)// "dlin: " - 6 + 4 numbers
-		items[curX][curY] += cha;
-	if (!upside && items[curX][curY + 1].length() < 7)	 // "kol: " - 5 + 2 numbers
-		items[curX][curY + 1] += cha;
+		items[curX][curY+1] += cha;	
 }
 
 ///
@@ -285,8 +289,8 @@ void Menu::Down()
 {
 	lcd.clear();
 	if (upside) upside = !upside;
-		else if (menuMode != Menus::Inp)
-			if (curY < maxY - 2)
+		else if (menuMode == Menus::Service)
+			if (curY < maxY - 1)
 				++curY;
 }
 
@@ -294,7 +298,7 @@ void Menu::Up()
 {
 	lcd.clear();
 	if (!upside) upside = !upside;
-	else if (menuMode != Menus::Inp)
+	else if (menuMode != Menus::Main)
 		if (curY > 0)
 			--curY;
 }

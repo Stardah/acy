@@ -75,6 +75,9 @@ void ControlPins::RunGear()
 	else digitalWrite((int)pins::gearForv, HIGH); // Auto
 	if (gearSpeed) digitalWrite((int)pins::gearSpeed, HIGH);
 	else digitalWrite((int)pins::gearSpeed, LOW);
+
+	if (sound) digitalWrite((int)pins::sound, HIGH);
+	else digitalWrite((int)pins::sound, LOW);
 }
 
 ///
@@ -85,6 +88,8 @@ void ControlPins::StopGear()
 	digitalWrite((int)pins::gearForv, LOW);
 	digitalWrite((int)pins::gearRev, LOW);
 	digitalWrite((int)pins::gearSpeed, LOW);
+	if (sound) digitalWrite((int)pins::sound, HIGH);
+	else digitalWrite((int)pins::sound, LOW);
 }
 
 ///
@@ -113,7 +118,16 @@ void ControlPins::UpdateInputs(int& encoderCounter)
 	encoderCounterRef = encoderCounter;
 
 	// TODO: notifications
-	if (emergency) StopGear();
+	if (emergency) 
+	{
+		sound = false;
+		StopGear();
+	}
+
+	if (knife) 
+	{
+		StopGear();
+	}
 
 	if (runOn && ifAuto) AutoMod(encoderCounter);
 	else if (!ifAuto) HandMode(encoderCounter);
@@ -143,6 +157,7 @@ void ControlPins::AutoMod(int& encoderCounter)
 	{
 		knifeSwitch = false;
 		encoderParts++; // + 1 part
+		sound = false;
 		if (parts != encoderParts) RunGear();
 		encoderLength = encoderCounter;
 	}
@@ -150,6 +165,7 @@ void ControlPins::AutoMod(int& encoderCounter)
 	if (!knifeSwitch)
 		if (encoderCounter - encoderLength >= length) // It's time to cut
 		{
+			sound = true;
 			StopGear();						// stop gear
 			knifeSwitch = true;				// wait for cut
 		}

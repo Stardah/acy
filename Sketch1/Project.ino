@@ -4,6 +4,7 @@
 #include "ControlPins.h"
 #include "ProgStruct.cpp"
 #include <LiquidCrystal.h>
+#include <EEPROM.h>
 
 // Display
 LiquidCrystal lcd(19, 18, 17, 16, 15, 14); 
@@ -35,8 +36,10 @@ bool serviceOn = false; // Service mode on
 volatile int encoderCounter = 0; // Encoder mm counter
 
 // Settings
-int eps = 10;
-int coolDown = 500;
+int eps = 11;
+int epsOld = 11;
+int coolDown = 12;
+int coolDownOld = 12;
 //volatile bool encoderB = false;
 int kostyl = 0; // TODO replace it with timer
 
@@ -47,11 +50,23 @@ void Addprog(int leng, int amt)
 	menu.UpdateValues(leng, amt);
 }
 
+// addr		var
+//	0		eps < 100
+//  1       coolDown/256 
+//  2       coolDown%256
 void setup()
 {
+	//read settings
+	eps = EEPROM.read(0);
+	coolDown = EEPROM.read(1) * 256 + EEPROM.read(2);
+
+	epsOld = eps;
+	coolDownOld = coolDown;
+
+	//setup
 	lcd.begin(16, 2);
 
-	Addprog(200, 4); // recover previous prog
+	Addprog(200, 4); // ??? recover previous prog
 	menu.DrawMenu();
 	lcd.cursor();
 	lcd.blink();
@@ -101,6 +116,21 @@ void loop()
 	}
 }
 
+void UpdateSettings() 
+{
+	if (eps != epsOld) 
+	{
+		EEPROM.write(0, eps);
+		epsOld = eps;
+	}
+	if (coolDown != coolDownOld)
+	{
+		EEPROM.write(1, highByte(coolDown));
+		EEPROM.write(2, lowByte(coolDown));
+		coolDownOld = coolDown;
+	}
+}
+
 int inputs[12];
 int* PinsUpdate() 
 {
@@ -135,6 +165,7 @@ void ServiceMode(char key)
 	case 'D':
 		serviceOn = false;
 		menu.ApplyInput(eps, coolDown); // Get input
+		UpdateSettings();
 		controlPins.SetEpsCool(eps,coolDown); // Update eps and coolDown in controlPins
 		if (cash == Menus::Run) menu.RunProg(programs.leng, programs.amt);
 		else menu.SetMenuMode(cash);

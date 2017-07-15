@@ -289,7 +289,8 @@ void Menu::Down()
 {
 	lcd.clear();
 	if (upside) upside = !upside;
-		else if (menuMode == Menus::Service)
+		else 
+			if (menuMode == Menus::Service)
 			if (curY < maxY - 1)
 				++curY;
 }
@@ -298,7 +299,8 @@ void Menu::Up()
 {
 	lcd.clear();
 	if (!upside) upside = !upside;
-	else if (menuMode != Menus::Main)
+	else 
+		if (menuMode == Menus::Service)
 		if (curY > 0)
 			--curY;
 }

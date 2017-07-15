@@ -1,6 +1,5 @@
 #include "ControlPins.h"
 
-
 ControlPins::ControlPins()
 {
 	pinMode((int)pins::encoderB, INPUT);
@@ -50,6 +49,7 @@ void ControlPins::Stop()
 {
 	//length = 0;
 	//parts = 0;
+	sound = false;
 	runOn = false;
 	gearSpeed = true;
 }
@@ -105,6 +105,7 @@ bool* ControlPins::ScanPins()
 ///
 /// update states for all pins and do doings
 ///
+bool wasAuto = false;
 void ControlPins::UpdateInputs(int encoderCounter)
 {
 	knife      = !ReadPin((int)pins::knife);
@@ -114,6 +115,7 @@ void ControlPins::UpdateInputs(int encoderCounter)
 	handDrive2 = !ReadPin((int)pins::handDrive2);
 	emergency  = ReadPin((int)pins::emergency);
 	ifAuto     = !ReadPin((int)pins::handAuto);
+
 
 	encoderCounterRef = encoderCounter;
 
@@ -125,9 +127,19 @@ void ControlPins::UpdateInputs(int encoderCounter)
 	}
 
 
-	if (runOn && ifAuto) AutoMod(encoderCounter);
+	if (runOn && ifAuto) 
+	{
+		if (!wasAuto)// If we just switched from the hand mode
+		{
+			encoderLength = encoderCounter;
+			if (!knife) RunGear();
+			// else ALERT!
+		}
+		AutoMod(encoderCounter);
+	}
 	else if (!ifAuto) HandMode(encoderCounter);
 
+	wasAuto = ifAuto;
 }
 
 ///
@@ -166,7 +178,7 @@ void ControlPins::AutoMod(int encoderCounter)
 			knifeSwitch = true;				// wait for cut
 		}
 	if (parts == encoderParts) Stop(); // If all parts done stop process
-	if (knife && ((encoderCounter - encoderLength)>1)) StopGear();
+	if (knife && ((encoderCounter - encoderLength)>10)) StopGear();
 }
 
 ControlPins::~ControlPins()

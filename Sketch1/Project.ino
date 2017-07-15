@@ -5,8 +5,10 @@
 #include "ProgStruct.cpp"
 #include <LiquidCrystal.h>
 
-LiquidCrystal lcd(19, 18, 17, 16, 15, 14); // Display
+// Display
+LiquidCrystal lcd(19, 18, 17, 16, 15, 14); 
 
+// Keypad
 const byte ROWS = 4; // Four rows
 const byte COLS = 4; // Four columns
 char keys[ROWS][COLS] =
@@ -18,23 +20,20 @@ char keys[ROWS][COLS] =
 };
 byte rowPins[ROWS] = { 6, 7, 8, 9 }; // Connect to the row pinouts of the keypad
 byte colPins[COLS] = { 2, 3, 4, 5 }; // Connect to the column pinouts of the keypad
+Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
+// End keypad
 
-bool input = false;		// Menu or input
+// External classes
+Menu menu(lcd);	// Menu update
+ControlPins controlPins; // Pins state update
+
+PROG programs; // Actually don't need this
+Menus cash = Menus::Inp; // Save previous menu
 bool progRun = false; // Access to write program
 bool stop = false; // stop menu
-volatile int encoderCounter = 0; // mm counter
-volatile bool encoderB = false;
-
-Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
-
-Menu menu(lcd);
-ControlPins controlPins;
-
-PROG programs;
-int curProg = 0; // Current program id
-bool ServiceOn = false;
-Menus cash = Menus::Inp;
-int kostyl = 0;
+bool serviceOn = false; // Service mode on
+volatile int encoderCounter = 0; // Encoder mm counter
+int kostyl = 0; // TODO replace it with timer
 
 void Addprog(int leng, int amt)
 {
@@ -46,9 +45,8 @@ void Addprog(int leng, int amt)
 void setup()
 {
 	lcd.begin(16, 2);
-	//Serial.begin(9600);
 
-	Addprog(2, 5); // recover previous prog
+	Addprog(1000, 4); // recover previous prog
 
 	menu.DrawMenu();
 	lcd.cursor();
@@ -80,7 +78,7 @@ void loop()
 		}
 	}
 	char key = keypad.getKey();					// Update Input
-	if (ServiceOn)
+	if (serviceOn)
 	{
 		kostyl++;
 		if (kostyl > 2000) 
@@ -93,8 +91,8 @@ void loop()
 	{
 		if (key == 'D')  // Service
 		{
-			ServiceOn = !ServiceOn;
-			if (!ServiceOn) 
+			serviceOn = !serviceOn;
+			if (!serviceOn) 
 			{
 				if (cash == Menus::Run) menu.RunProg(programs.leng,programs.amt);
 				else menu.SetMenuMode(cash);
@@ -108,7 +106,7 @@ void loop()
 		}
 		else
 		{
-			if (ServiceOn) ServiceMode(key);
+			if (serviceOn) ServiceMode(key);
 			else if (progRun) RunningMode(key);
 			else if (stop) StopMode(key);
 			else MenuMode(key);
@@ -116,8 +114,8 @@ void loop()
 		}
 	}
 }
-int inputs[12];
 
+int inputs[12];
 int* PinsUpdate() 
 {
 	inputs[0] = digitalRead((int)pins::forRev1);
@@ -152,7 +150,6 @@ void ServiceMode(char key)
 
 void RunningMode(char key)
 {
-	encoderB = (bool)digitalRead((int)pins::encoderB);
 	if (key == 'A') {
 		progRun = false;
 		stop = true;
@@ -213,18 +210,10 @@ void MenuMode(char key)
 	}
 }
 
-void EncoderChange()
+void EncoderChange() // Interruption
 {
-	//if (encoderCounter > 100000) encoderCounter = 1000;
-	//if (encoderCounter < -100000) encoderCounter = -1000;
-	if ((bool)digitalRead(52))
-	{
-		//Serial.println("Encoder++");
+	if ((bool)digitalRead(52)) // Read encoderB
 		encoderCounter++;
-	}
 	else
-	{
-		//Serial.println("Encoder--");
 		encoderCounter--;
-	}
 };

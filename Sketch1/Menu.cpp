@@ -92,31 +92,31 @@ Menu::Menu(const LiquidCrystal& lcdInit) :
 	// Close curX = 2
 	items[2][0] = P+r+o+d+o+l+zh+si+t+smyagkiy+':'+' '+'#';
 	items[2][1] = M+e+n+u+':'+' '+'*';
+	// Service
+	items[3][0] = T + o + ch + n + o + s + t + smyagkiy + " = ";
+	items[3][1] = Z + a + d + e + r + zh + k + a + " = ";
 	// Print a message to the LCD.
 	lcd.print("  "+Z+a+g+r+y+z+k+a+"...");
 }
 
-void Menu::UpdateProgRaw(int leng, int amt)
+void Menu::UpdateValues(int leng, int amt)
 {
-	items[0][0] = dlin + String(leng);
-	items[0][1] = kol + String(amt);
+	if (menuMode == Menus::Inp)
+	{
+		items[curX][0] = dlin + String(leng);
+		items[curX][1] = kol + String(amt);
+	}
+	else // Service
+	{
+		items[curX][0] = T + o + ch + n + o + s + t + smyagkiy + " = " + String(leng);
+		items[curX][1] = Z + a + d + e + r + zh + k + a + " = " + String(amt);
+	}
 }
 
-String str = "";
 void Menu::DrawMenu()
 {
 	switch (menuMode)
 	{
-	/*case Service: // +'>' before selected line
-		lcd.setCursor(0, 0);
-		if (upside) str = ">";
-		lcd.print(str+items[curX][curY]);
-		lcd.setCursor(0, 1);
-		str = "";
-		if (!upside) str = ">";
-		lcd.print(str+items[curX][curY + 1]);
-		break;
-		*/
 	case Inp: // cursor after selected line
 		if (upside) 
 		{
@@ -150,26 +150,35 @@ void Menu::DrawService(int inputs[12], int encoderCounter)
 		if (inputs[i]==1) inp[i] = "1"; 
 		else inp[i] = "0";
 	
-	items[3][0]=
-		"FR1" + inp[0] +
-		" FR2" +inp[1] +// 9 
-		" HD1" +inp[2]; // 14
-	items[3][1]=
-		"HD2" + inp[3] + // 4
-		" EM" + inp[4] + // 8
-		" AU" + inp[5] + // 12
-		" KN" + String(inputs[6]); // 16
-	items[3][2]=
-		"GF"  + inp[7] +// 3
-		" GS" + inp[8] +// 7
-		" SO" + inp[9] +// 11
-		" E" + inp[10]+ inp[11]; // 15
-	items[3][3] = String(encoderCounter);
+		items[3][2] =
+			"FR1 = " + inp[0] +
+			" FR2 = " + inp[1];// 9 
+		items[3][3]	= 
+			"HD1 = " + inp[2] + // 14
+			" HD2 = " + inp[3];
+		items[3][4] =
+			A+v+a+r+"= " + inp[4] +
+			" "+A+v+t+o+"= " + inp[5];
+		items[3][5] =
+			N + o + zh + " = " + inp[6] +
+			" EAB=" + inp[10] + ":" +inp[11];
+		items[3][6] = Ee + n+k+o+d+e+r+" = "+ String(encoderCounter);
 	lcd.clear();
-	lcd.setCursor(0, 0);
-	lcd.print(items[3][curY]);
-	lcd.setCursor(0, 1);
-	lcd.print(items[3][curY + 1]);
+
+	if (upside)
+	{
+		lcd.setCursor(0, 1);
+		lcd.print(items[curX][curY + 1]);
+		lcd.setCursor(0, 0);
+		lcd.print(items[curX][curY]);
+	}
+	else
+	{
+		lcd.setCursor(0, 0);
+		lcd.print(items[curX][curY]);
+		lcd.setCursor(0, 1);
+		lcd.print(items[curX][curY + 1]);
+	}
 }
 
 void Menu::RTUpdate(int curlength, int curparts)
@@ -221,6 +230,7 @@ void Menu::SetMenuMode(int newMenu)
 		curY = 0;
 		break;
 	case Service:
+		upside = true;
 		lcd.clear();
 		curX = 3;
 		curY = 0;
@@ -234,10 +244,18 @@ void Menu::SetMenuMode(int newMenu)
 
 void Menu::ApplyInput(int &leng, int &amt)
 {
-	leng = items[0][0].substring(6).toInt();
-	amt = items[0][1].substring(5).toInt();
-	length = leng;	// Set length
-	parts = amt;	// Set parts
+	if (menuMode == Menus::Inp)
+	{
+		leng = items[0][0].substring(6).toInt();
+		amt = items[0][1].substring(5).toInt();
+		length = leng;	// Set length
+		parts = amt;	// Set parts
+	}
+	else // Service
+	{
+		leng = items[curX][0].substring(11).toInt();
+		amt = items[curX][1].substring(11).toInt();
+	}
 }
 
 ///
@@ -250,12 +268,29 @@ void Menu::Notification(int i)
 	//lcd.print(notification[i]);
 }
 
+///
+/// Input char
+///
 void Menu::Input(char cha)
 {
-	if (upside && items[curX][curY].length() < 10 )// "dlin: " - 6 + 4 numbers
-		items[curX][curY] += cha;
-	if (!upside && items[curX][curY + 1].length() < 7)	 // "kol: " - 5 + 2 numbers
-		items[curX][curY+1] += cha;	
+		if (menuMode == Menus::Inp)
+		{
+			if (upside && items[curX][curY].length() < 10)// "dlin: " - 6 + 4 numbers
+				items[curX][curY] += cha;
+			if (!upside && items[curX][curY + 1].length() < 7)	 // "kol: " - 5 + 2 numbers
+				items[curX][curY + 1] += cha;
+		}
+		else if (curY<2) // Service
+		{
+			if (upside && curY == 1 && items[curX][curY].length() < 15)
+				items[curX][curY] += cha;
+			else
+			if (upside && items[curX][curY].length() < 13)// "dlin: " - 6 + 4 numbers
+				items[curX][curY] += cha;
+			else
+			if (!upside && items[curX][curY + 1].length() < 15)	 // "kol: " - 5 + 2 numbers
+				items[curX][curY + 1] += cha;
+		}
 }
 
 ///
@@ -263,26 +298,30 @@ void Menu::Input(char cha)
 ///
 void Menu::DelLast()
 {
-	if (upside && items[curX][curY].length() > 6) //"dlin: " - 6
+	if (menuMode == Menus::Inp)
 	{
-		items[curX][curY] = items[curX][curY].substring(0, items[curX][curY].length() - 1);
-		lcd.clear();
+		if (upside && items[curX][curY].length() > 6) //"dlin: " - 6
+		{
+			items[curX][curY] = items[curX][curY].substring(0, items[curX][curY].length() - 1);
+			lcd.clear();
+		}
+		if (!upside && items[curX][curY + 1].length() > 5) // "kol: "- 5
+		{
+			items[curX][curY + 1] = items[curX][curY + 1].substring(0, items[curX][curY + 1].length() - 1);
+			lcd.clear();
+		}
 	}
-	if(!upside && items[curX][curY+1].length() > 5) // "kol: "- 5
+	else if (curY<2) // Service
 	{
-		items[curX][curY+1] = items[curX][curY+1].substring(0, items[curX][curY+1].length() - 1);
-		lcd.clear();
+		if (upside && items[curX][curY].length() > 11) //"dlin: " - 6
+		{
+			items[curX][curY] = items[curX][curY].substring(0, items[curX][curY].length() - 1);
+		}
+		if (!upside && items[curX][curY + 1].length() > 11) // "kol: "- 5
+		{
+			items[curX][curY + 1] = items[curX][curY + 1].substring(0, items[curX][curY + 1].length() - 1);
+		}
 	}
-}
-
-void Menu::Right()
-{
-	lcd.scrollDisplayLeft();
-}
-
-void Menu::Left()
-{
-	lcd.scrollDisplayRight();
 }
 
 void Menu::Down()
@@ -304,22 +343,5 @@ void Menu::Up()
 		if (curY > 0)
 			--curY;
 }
-
-int Menu::getX() const
-{
-	return curX;
-}
-
-int Menu::getY() const
-{
-	return curY;
-}
-
-void Menu::Toast(String str)
-{
-	lcd.setCursor(0, 0);
-	lcd.print(str);
-}
-
 
 

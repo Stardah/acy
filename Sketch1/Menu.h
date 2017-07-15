@@ -8,7 +8,7 @@ public:
 	Menu(const LiquidCrystal& lcdInit);
 	~Menu() = default;
 
-	void UpdateProgRaw(int leng, int amt);
+	void UpdateValues(int leng, int amt);
 	void SetMenuMode(int newMenu);
 	void ApplyInput(int& leng, int& amt);
 	void DrawMenu();
@@ -18,20 +18,15 @@ public:
 	void Notification(int i);
 	void Input(char word);
 	void DelLast();
-	void Right();
-	void Left();
 	void Up();
 	void Down();
-	void Toast(String str);
-	int getX() const;
-	int getY() const;
 	Menus getMenu() 
 	{
 		return menuMode;
 	}
 private:
 	static const size_t maxX = 5;
-	static const size_t maxY = 4;
+	static const size_t maxY = 8;
 	Menus menuMode = Menus::Inp;
 	LiquidCrystal lcd;
 	String items[maxX][maxY];

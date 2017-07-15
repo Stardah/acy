@@ -2,7 +2,7 @@
 
 ControlPins::ControlPins(int error_)
 {
-	error = error_;
+	eps = error_;
 	pinMode((int)pins::encoderB, INPUT);
 	pinMode((int)pins::forRev1, INPUT);
 	pinMode((int)pins::forRev2, INPUT);
@@ -174,7 +174,7 @@ void ControlPins::AutoMod(int encoderCounter)
 {
 	if (rollback) // Rollback
 	{
-		if (encoderCounter - encoderLength <= length + error) // We've got it
+		if (encoderCounter - encoderLength <= length + eps) // We've got it
 		{
 			StopGear();
 			gearForv = true;
@@ -201,7 +201,7 @@ void ControlPins::AutoMod(int encoderCounter)
 			if (encoderCounter - encoderLength >= length) // It's time to cut but...
 			{
 				StopGear(); // Stop engine
-				delay(500);
+				delay(coolDown);	// CoolDown
 				rollback = true;								// Ok then. Rollback a bit
 				gearForv = false;								// Turn gear to reverse
 				gearSpeed = false;								// Activate the slowest speed

@@ -19,6 +19,11 @@ public:
 	bool* ScanPins();
 	void UpdateInputs(int encoderCounter);
 
+	void SetEpsCool(int eps_, int coolDown_)
+	{
+		eps = eps_;
+		coolDown = coolDown_;
+	};
 	int GetLength() 
 	{
 		//if (knifeSwitch) return length;
@@ -57,7 +62,8 @@ private:
 	int encoderCounterRef;
 	int length = 0;
 	int parts = 0;
-	int error = 0;
+	int eps = 0;
+	int coolDown = 0;
 	int kostyl = 0;
 };
 

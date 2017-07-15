@@ -33,6 +33,10 @@ bool progRun = false; // Access to write program
 bool stop = false; // stop menu
 bool serviceOn = false; // Service mode on
 volatile int encoderCounter = 0; // Encoder mm counter
+
+// Settings
+int eps = 10;
+int coolDown = 500;
 //volatile bool encoderB = false;
 int kostyl = 0; // TODO replace it with timer
 
@@ -40,7 +44,7 @@ void Addprog(int leng, int amt)
 {
 	programs.leng = leng;
 	programs.amt = amt;
-	menu.UpdateProgRaw(leng, amt);
+	menu.UpdateValues(leng, amt);
 }
 
 void setup()
@@ -48,13 +52,11 @@ void setup()
 	lcd.begin(16, 2);
 
 	Addprog(200, 4); // recover previous prog
-
 	menu.DrawMenu();
 	lcd.cursor();
 	lcd.blink();
 
 	attachInterrupt(3, EncoderChange, FALLING);
-	//attachInterrupt(2, EncoderChangeB, CHANGE);
 }
 
 void loop() 
@@ -89,31 +91,13 @@ void loop()
 			kostyl = 0;
 		}
 	}
-	if (key != NO_KEY) 
+	if (key != NO_KEY)
 	{
-		if (key == 'D')  // Service
-		{
-			serviceOn = !serviceOn;
-			if (!serviceOn) 
-			{
-				if (cash == Menus::Run) menu.RunProg(programs.leng,programs.amt);
-				else menu.SetMenuMode(cash);
-				menu.DrawMenu();
-			}
-			else
-			{
-				cash = menu.getMenu();
-				menu.SetMenuMode(Menus::Service);
-			}
-		}
-		else
-		{
-			if (serviceOn) ServiceMode(key);
-			else if (progRun) RunningMode(key);
-			else if (stop) StopMode(key);
-			else MenuMode(key);
-			menu.DrawMenu();						// Update Menu
-		}
+		if (serviceOn) ServiceMode(key);
+		else if (progRun) RunningMode(key);
+		else if (stop) StopMode(key);
+		else MenuMode(key);
+		menu.DrawMenu();						// Update Menu
 	}
 }
 
@@ -127,9 +111,9 @@ int* PinsUpdate()
 	inputs[4] = digitalRead((int)pins::emergency);
 	inputs[5] = digitalRead((int)pins::handAuto);
 	inputs[6] = digitalRead((int)pins::knife);
-	inputs[7] = digitalRead((int)pins::gearForv);
-	inputs[8] = digitalRead((int)pins::gearSpeed);
-	inputs[9] = digitalRead((int)pins::sound);
+	inputs[7] = false;//digitalRead((int)pins::gearForv);
+	inputs[8] = false;//digitalRead((int)pins::gearSpeed);
+	inputs[9] = false;//digitalRead((int)pins::sound);
 	inputs[10] =digitalRead((int)pins::encoderA);
 	inputs[11] =digitalRead((int)pins::encoderB);
 	return inputs;
@@ -139,13 +123,25 @@ void ServiceMode(char key)
 {
 	switch (key)
 	{
+	case '*':
+		menu.DelLast();
+		break;
 	case 'B':
 		menu.Up();
 		break;
 	case 'C':
 		menu.Down();
 		break;
+	case 'D':
+		serviceOn = false;
+		menu.ApplyInput(eps, coolDown); // Get input
+		controlPins.SetEpsCool(eps,coolDown); // Update eps and coolDown in controlPins
+		if (cash == Menus::Run) menu.RunProg(programs.leng, programs.amt);
+		else menu.SetMenuMode(cash);
+		menu.DrawMenu();
+		break;
 	default:
+		menu.Input(key);
 		break;
 	}
 }
@@ -206,6 +202,12 @@ void MenuMode(char key)
 		progRun = true;
 		menu.RunProg(programs.leng, programs.amt);
 		break;
+	case 'D': // Service
+		serviceOn = true;
+		cash = menu.getMenu();
+		menu.SetMenuMode(Menus::Service);
+		menu.UpdateValues(eps, coolDown); // Service
+		break;
 	default:
 		menu.Input(key);
 		break;
@@ -218,9 +220,4 @@ void EncoderChange() // Interruption
 		encoderCounter++;
 	else
 		encoderCounter--;
-};
-
-void EncoderChangeB() // Interruption
-{
-	//encoderB = (bool)digitalRead(21);
 };

@@ -178,7 +178,7 @@ void Menu::RTUpdate(int curlength, int curparts)
 	{
 		lcd.clear();
 		items[1][1] = T + e + k + ": " + String(curlength);
-		for (int i = 0; i <= 4 - String(curlength).length(); i++)
+		if (String(curlength).length()<=4) for (int i = 0; i <= 4 - String(curlength).length(); i++)
 		{
 			items[1][1] += " ";
 		}

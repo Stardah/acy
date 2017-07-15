@@ -1,14 +1,14 @@
 #pragma once
 #include <Arduino.h>
 
-enum class pins { encoderA = 20, encoderB = 52, knife = 50, forRev1 = 48, forRev2 = 46,
+enum class pins { encoderA = 20, encoderB = 21, knife = 50, forRev1 = 48, forRev2 = 46,
 	handDrive1 = 44, handDrive2 = 42, emergency = 40, handAuto = 38, 
 	gearRev = 22, gearForv = 24, gearSpeed = 23, sound = 25};
 
 class ControlPins
 {
 public:
-	ControlPins();
+	ControlPins(int error);
 	static bool ReadPin(int num) 
 	{
 		return bool(digitalRead(num));
@@ -50,11 +50,14 @@ private:
 
 	bool knifeSwitch = false;
 	bool runOn = false;
+	bool rollback = false;
 	//long encoderCounter = 0; // mm counter
 	int encoderLength = 0;
 	int encoderParts = 0;
 	int encoderCounterRef;
 	int length = 0;
 	int parts = 0;
+	int error = 0;
+	int kostyl = 0;
 };
 

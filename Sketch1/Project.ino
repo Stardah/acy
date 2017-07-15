@@ -25,7 +25,7 @@ Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
 // External classes
 Menu menu(lcd);	// Menu update
-ControlPins controlPins; // Pins state update
+ControlPins controlPins(20); // Pins state update, error = 20
 
 PROG programs; // Actually don't need this
 Menus cash = Menus::Inp; // Save previous menu
@@ -33,6 +33,7 @@ bool progRun = false; // Access to write program
 bool stop = false; // stop menu
 bool serviceOn = false; // Service mode on
 volatile int encoderCounter = 0; // Encoder mm counter
+//volatile bool encoderB = false;
 int kostyl = 0; // TODO replace it with timer
 
 void Addprog(int leng, int amt)
@@ -46,13 +47,14 @@ void setup()
 {
 	lcd.begin(16, 2);
 
-	Addprog(1000, 4); // recover previous prog
+	Addprog(200, 4); // recover previous prog
 
 	menu.DrawMenu();
 	lcd.cursor();
 	lcd.blink();
 
 	attachInterrupt(3, EncoderChange, FALLING);
+	//attachInterrupt(2, EncoderChangeB, CHANGE);
 }
 
 void loop() 
@@ -212,8 +214,13 @@ void MenuMode(char key)
 
 void EncoderChange() // Interruption
 {
-	if ((bool)digitalRead(52)) // Read encoderB
+	if (digitalRead(21) != 0) // Read encoderB
 		encoderCounter++;
 	else
 		encoderCounter--;
+};
+
+void EncoderChangeB() // Interruption
+{
+	//encoderB = (bool)digitalRead(21);
 };

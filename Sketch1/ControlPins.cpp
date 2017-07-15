@@ -1,7 +1,8 @@
 #include "ControlPins.h"
 
-ControlPins::ControlPins()
+ControlPins::ControlPins(int error_)
 {
+	error = error_;
 	pinMode((int)pins::encoderB, INPUT);
 	pinMode((int)pins::forRev1, INPUT);
 	pinMode((int)pins::forRev2, INPUT);
@@ -23,6 +24,7 @@ ControlPins::ControlPins()
 void ControlPins::Reset()
 {
 	knifeSwitch = false;
+	rollback = false;
 	length = 0;
 	parts = 0;
 	encoderLength = 0;
@@ -52,6 +54,7 @@ void ControlPins::Stop()
 	sound = false;
 	runOn = false;
 	gearSpeed = true;
+	gearForv = true;
 }
 
 ///
@@ -72,7 +75,16 @@ void ControlPins::RunGear()
 			else digitalWrite((int)pins::gearRev, HIGH);
 		}
 	}
-	else digitalWrite((int)pins::gearForv, HIGH); // Auto
+	else if (gearForv)
+	{
+		digitalWrite((int)pins::gearForv, HIGH); // Auto forward
+		digitalWrite((int)pins::gearRev, LOW);
+	}
+	else
+	{
+		digitalWrite((int)pins::gearRev, HIGH); // Auto reverse
+		digitalWrite((int)pins::gearForv, LOW);
+	}
 	if (gearSpeed) digitalWrite((int)pins::gearSpeed, HIGH);
 	else digitalWrite((int)pins::gearSpeed, LOW);
 
@@ -160,25 +172,43 @@ void ControlPins::HandMode(int encoderCounter)
 ///
 void ControlPins::AutoMod(int encoderCounter)
 {
-	// Knife's up/down motions
-	if (knife && knifeSwitch)
+	if (rollback) // Rollback
 	{
-		knifeSwitch = false;
-		encoderParts++; // + 1 part
-		sound = false;
-		if (parts != encoderParts) RunGear();
-		encoderLength = encoderCounter;
-	}
-	// end knife
-	if (!knifeSwitch)
-		if (encoderCounter - encoderLength >= length) // It's time to cut
+		if (encoderCounter - encoderLength <= length + error) // We've got it
 		{
-			sound = true;
-			StopGear();						// stop gear
-			knifeSwitch = true;				// wait for cut
+			StopGear();
+			gearForv = true;
+			gearSpeed = true;
+			rollback = false;
+			sound = true;					// sound
+			knifeSwitch = true;				// wait for a cut
 		}
-	if (parts == encoderParts) Stop(); // If all parts done stop process
-	if (knife && ((encoderCounter - encoderLength)>10)) StopGear();
+		else RunGear();
+	}
+	else
+	{
+		// Knife's up/down motions
+		if (knife && knifeSwitch)
+		{
+			knifeSwitch = false;
+			encoderParts++; // + 1 part
+			sound = false;
+			if (parts != encoderParts) RunGear();
+			encoderLength = encoderCounter;
+		}
+		// end knife
+		if (!knifeSwitch)
+			if (encoderCounter - encoderLength >= length) // It's time to cut but...
+			{
+				StopGear(); // Stop engine
+				delay(500);
+				rollback = true;								// Ok then. Rollback a bit
+				gearForv = false;								// Turn gear to reverse
+				gearSpeed = false;								// Activate the slowest speed
+			}
+		if (parts == encoderParts) Stop(); // If all parts done stop process
+	}
+	if (knife && ((encoderCounter - encoderLength)>10)) StopGear(); // Knife down when we run
 }
 
 ControlPins::~ControlPins()

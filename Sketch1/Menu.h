@@ -1,6 +1,6 @@
 #include <LiquidCrystal.h>
 
-enum Menus {Inp, Stop, Run, Service, Notify };
+enum Menus {Inp, Run, Service, Notify };
 
 class Menu
 {

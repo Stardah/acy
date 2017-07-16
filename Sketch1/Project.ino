@@ -31,9 +31,9 @@ ControlPins controlPins(20); // Pins state update, error = 20
 PROG programs; // Actually don't need this
 Menus cash = Menus::Inp; // Save previous menu
 bool progRun = false; // Access to write program
-bool stop = false; // stop menu
 bool serviceOn = false; // Service mode on
 int notification = -1;
+int notificationWas = -1;
 bool notifyAwait = false;
 volatile int encoderCounter = 0; // Encoder mm counter
 
@@ -87,8 +87,17 @@ void loop()
 	kostyl++;
 	if (kostyl > 2000)
 	{
-		if (notifyAwait) 
+		if (notifyAwait)
+		{
+			NotifyMod();
 			menu.Notification(notification);
+		}
+		else // From AHTUNG to smth
+			if (notificationWas == 0 && notification != 0)
+			{
+				lcd.clear();
+				menu.DrawMenu();
+			}
 		else
 		if (progRun)
 		{
@@ -110,16 +119,16 @@ void loop()
 			menu.DrawService(PinsUpdate(), encoderCounter);
 
 		kostyl = 0;
+
+		notificationWas = notification;
 	}
 
-	if (key != NO_KEY)
+	if (key != NO_KEY && !notifyAwait)
 	{
-		if (notifyAwait) NotifyMod();
-		else if (serviceOn) ServiceMode(key);
+		if (serviceOn) ServiceMode(key);
 		else if (progRun) RunningMode(key);
-		else if (stop) StopMode(key);
 		else MenuMode(key);
-		menu.DrawMenu();						// Update Menu
+		menu.DrawMenu();// Update Menu
 	}
 }
 
@@ -190,39 +199,27 @@ void ServiceMode(char key)
 
 void NotifyMod() 
 {
-
+	if (notificationWas != 0 && notification == 0)
+	{
+		lcd.cursor();
+		lcd.blink();
+		if (controlPins.GetAuto() && progRun) controlPins.Stop();
+		progRun = false;
+		controlPins.Reset();
+		menu.SetMenuMode(Menus::Inp);
+	}
 }
 
 void RunningMode(char key)
 {
+	if (!controlPins.GetAuto())
 	if (key == 'A') {
+		lcd.cursor();
+		lcd.blink();
 		progRun = false;
-		stop = true;
-		menu.SetMenuMode(Menus::Stop);
-	}
-}
-
-void StopMode(char key) 
-{
-	if (stop)
-	{
-		if (key == '#') // Продолжаем
-		{
-			stop = false;
-			progRun = true;
-			controlPins.Start(programs.leng, programs.amt, encoderCounter);
-			menu.RunProg(controlPins.GetLength(), controlPins.GetParts());
-		}
-		else if (key == '*') // Стоп
-		{
-			menu.SetMenuMode(Menus::Inp);;
-			lcd.cursor();
-			lcd.blink();
-			stop = false;
-			progRun = false;
-			controlPins.Stop();
-			controlPins.Reset();
-		}
+		controlPins.Stop();
+		controlPins.Reset();
+		menu.SetMenuMode(Menus::Inp);
 	}
 }
 

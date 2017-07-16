@@ -33,6 +33,11 @@ public:
 	{
 		return encoderParts;
 	};
+
+	bool GetAuto()
+	{
+		return ifAuto;
+	};
 	~ControlPins();
 private:
 	void RunGear();

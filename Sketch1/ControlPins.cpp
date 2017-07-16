@@ -32,6 +32,8 @@ void ControlPins::Reset()
 	encoderLength = 0;
 	encoderParts = 0;
 	firstIteration = true;
+	runOn = false;
+	notify = -1;
 }
 
 ///
@@ -43,7 +45,7 @@ void ControlPins::Start(long newlength, int newparts, int encoderCounter)
 	parts = newparts;
 	runOn = true;
 	encoderLength = encoderCounter; // set init conter to current length
-	Sound(700);
+	if (ifAuto) Sound(700);
 	//RunGear();
 }
 
@@ -58,11 +60,14 @@ void ControlPins::Stop()
 	runOn = false;
 	notify = -1;
 	StopGear();
-	Sound(300);
-	delay(300);
-	Sound(300);
-	delay(300);
-	Sound(300);
+	if (ifAuto)
+	{
+		Sound(300);
+		delay(300);
+		Sound(300);
+		delay(300);
+		Sound(300);
+	}
 }
 
 ///
@@ -168,7 +173,7 @@ void ControlPins::HandMode(int encoderCounter)
 		StopGear(); 
 	else if (handDrive1 || handDrive2) // if presed move then move 
 		RunGear(); 
-	else StopGear(); 									// if not move then stop		
+	else StopGear(); // if do not move then stop		
 	notify = -1;
 }
 

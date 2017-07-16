@@ -243,11 +243,6 @@ void Menu::SetMenuMode(int newMenu)
 		curX = 0;
 		curY = 0;
 		break;
-	case Stop:
-		lcd.clear();
-		curX = 2;
-		curY = 0;
-		break;
 	case Service:
 		upside = true;
 		lcd.clear();

@@ -65,6 +65,8 @@ void setup()
 	epsOld = eps;
 	coolDownOld = coolDown;
 
+	controlPins.SetEpsCool(eps, coolDown);
+
 	//setup
 	lcd.begin(16, 2);
 
@@ -223,7 +225,6 @@ void StopMode(char key)
 	{
 		if (key == '#') // Продолжаем
 		{
-			progRun = true;
 			stop = false;
 			progRun = true;
 			controlPins.Start(programs.leng, programs.amt, encoderCounter);
@@ -235,6 +236,7 @@ void StopMode(char key)
 			lcd.cursor();
 			lcd.blink();
 			stop = false;
+			progRun = false;
 			controlPins.Stop();
 			controlPins.Reset();
 		}
@@ -260,6 +262,7 @@ void MenuMode(char key)
 		menu.ApplyInput(programs.leng, programs.amt);
 		lcd.noCursor();
 		lcd.noBlink();
+		controlPins.Reset();
 		controlPins.Start(programs.leng, programs.amt, encoderCounter);
 		progRun = true;
 		menu.RunProg(programs.leng, programs.amt);

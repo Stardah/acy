@@ -25,10 +25,13 @@ void ControlPins::Reset()
 {
 	knifeSwitch = false;
 	rollback = false;
+	gearSpeed = true;
+	gearForv = true;
 	length = 0;
 	parts = 0;
 	encoderLength = 0;
 	encoderParts = 0;
+	firstIteration = true;
 }
 
 ///
@@ -40,7 +43,7 @@ void ControlPins::Start(long newlength, int newparts, int encoderCounter)
 	parts = newparts;
 	runOn = true;
 	encoderLength = encoderCounter; // set init conter to current length
-	RunGear();
+	//RunGear();
 }
 
 
@@ -53,8 +56,7 @@ void ControlPins::Stop()
 	//parts = 0;
 	sound = false;
 	runOn = false;
-	gearSpeed = true;
-	gearForv = true;
+	StopGear();
 }
 
 ///
@@ -117,7 +119,6 @@ bool* ControlPins::ScanPins()
 ///
 /// update states for all pins and do doings
 ///
-bool wasAuto = false;
 // -1 OK
 //  0 FULL_STOP
 //  1 KNIFE
@@ -141,18 +142,16 @@ int ControlPins::UpdateInputs(int encoderCounter)
 		StopGear();
 		return 0; // FULL_STOP
 	}
-
-	if (runOn && ifAuto) 
-	{
-		if (!wasAuto)// If we just switched from the hand mode
+		if (!ifAuto) HandMode(encoderCounter);	// Hand Mode
+		else if (runOn && ifAuto)				// Auto Mode 
 		{
-			encoderLength = encoderCounter;
-			if (!knife) RunGear();
-			else return 1; // KNIFE
+			if (firstIteration)// If it is the first iteration of program
+			{
+				knifeSwitch = true; // Wait for knife cut
+				encoderLength = encoderCounter;	// Update current encoderLength
+			}
+			return AutoMod(encoderCounter); // Do auto stuff
 		}
-		return AutoMod(encoderCounter);
-	}
-	else if (!ifAuto) HandMode(encoderCounter);
 	return -1;
 }
 
@@ -161,7 +160,7 @@ int ControlPins::UpdateInputs(int encoderCounter)
 ///
 void ControlPins::HandMode(int encoderCounter)
 {
-	wasAuto = ifAuto;
+	firstIteration = true;
 	if (knife) encoderLength = encoderCounter;
 	if (handDrive1 && handDrive2) // if both then stop
 		StopGear(); 
@@ -175,48 +174,55 @@ void ControlPins::HandMode(int encoderCounter)
 ///
 int ControlPins::AutoMod(int encoderCounter)
 {
-	wasAuto = ifAuto;
-	if (rollback) // Rollback
+	if (rollback) // Rollback (2nd step)
 	{
 		if (encoderCounter - encoderLength <= length + eps) // We've got it
 		{
 			StopGear();
-			gearForv = true;
-			gearSpeed = true;
-			rollback = false;
-			sound = true;					// sound
-			knifeSwitch = true;				// wait for a cut
-			return 1; // KNIFE
+			gearForv = true;	// Move Forward
+			gearSpeed = true;	// Whith high speed
+			rollback = false;	// End rollback
+			sound = true;		// Signal to cut
+			delay(500);
+			sound = false;		// Turn sound off
+			knifeSwitch = true;	// Waiting for a cut
+			return 1; // KNIFE (notiry about cut movement)
 		}
-		else RunGear();
+		else RunGear();	// If we stil need rollback, just continue
 	}
-	else
+	else // Move forward
 	{
-		// Knife's up/down motions
-		if (knife && knifeSwitch)
+		if (knife && knifeSwitch) // Waiting for a cut. Knife's up-down motion.
 		{
-			knifeSwitch = false;
-			encoderParts++; // + 1 part
-			sound = false;
-			if (parts != encoderParts) RunGear();
-			encoderLength = encoderCounter;
+			knifeSwitch = false;	// Stop waiting for a cut
+			if (firstIteration) firstIteration = false; // First iter. already started, so make if false
+			else encoderParts++;			// + 1 part (increment)
+			encoderLength = encoderCounter;	// Update current encoder length
 		}
 		// end knife
-		if (!knifeSwitch)
-			if (encoderCounter - encoderLength >= length) // It's time to cut but...
+		if (!knifeSwitch) // Run (1st step)
+		{
+			if (!knife)
 			{
-				StopGear(); // Stop engine
-				delay(coolDown);	// CoolDown
-				rollback = true;								// Ok then. Rollback a bit
-				gearForv = false;								// Turn gear to reverse
-				gearSpeed = false;								// Activate the slowest speed
+				RunGear(); // Run if knife is up
+
+				if (encoderCounter - encoderLength >= length) // It's time to cut but...
+				{
+					StopGear();			// Stop engine
+					delay(coolDown);	// Wait while drive is stoping
+					rollback = true;	// Start Rollback
+					gearForv = false;	// and turn gear to reverse
+					gearSpeed = false;	// and activate the slowest speed
+				}
 			}
+			else if (encoderCounter - encoderLength > eps)
+			{					// if knife is down    
+				StopGear();		// Stop gear
+				knifeSwitch = true; // Wait for a cut again
+									// TODO: may be we should notify about it
+			}
+		}
 		if (parts == encoderParts) Stop(); // If all parts done stop process
-	}
-	if (knife && ((encoderCounter - encoderLength) > 10))
-	{
-		StopGear(); // Knife down when we run
-		return 0;	// FULL_STOP
 	}
 	return -1;
 }

@@ -56,6 +56,7 @@ private:
 	bool knifeSwitch = false;
 	bool runOn = false;
 	bool rollback = false;
+	bool firstIteration = true;
 	//long encoderCounter = 0; // mm counter
 	int encoderLength = 0;
 	int encoderParts = 0;

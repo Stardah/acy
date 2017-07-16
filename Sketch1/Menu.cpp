@@ -69,8 +69,8 @@
 #define u String(char(198))
 #define ya String(char(199))
 
-String dlin = D+l+si+n+": ";
-String kol = K+o+l+": ";
+String dlin = D+l+si+n+a+": ";
+String kol = K+o+l+"-"+v+o+": ";
 String iz = I+z;
 
 
@@ -90,6 +90,7 @@ Menu::Menu(const LiquidCrystal& lcdInit) :
 	}
 
 	// Notifications
+	notification[0] = ""+A+v+a+r+". "+o+s+t+a+n+o+v+"!";
 	notification[1] ="    "+ O + t + r + e + zh + t + e+"!";
 
 	// Close curX = 2
@@ -148,6 +149,9 @@ void Menu::DrawMenu()
 	}
 }
 
+///
+/// Draw service menu
+///
 String inp[12];
 void Menu::DrawService(int inputs[12], int encoderCounter)
 {
@@ -187,6 +191,9 @@ void Menu::DrawService(int inputs[12], int encoderCounter)
 	}
 }
 
+///
+/// Draw run mode menu
+///
 void Menu::RTUpdate(int curlength, int curparts)
 {
 	if (curX == 1) 
@@ -201,6 +208,9 @@ void Menu::RTUpdate(int curlength, int curparts)
 	}
 }
 
+///
+/// Switch to run menu
+///
 void Menu::RunProg(int leng, int amt) 
 {
 	lcd.clear();
@@ -218,6 +228,9 @@ void Menu::RunProg(int leng, int amt)
 	menuMode = Menus::Run;
 }
 
+///
+/// Switch to chosen menu mode
+///
 void Menu::SetMenuMode(int newMenu)
 {
 	upside = true;
@@ -253,12 +266,15 @@ void Menu::SetMenuMode(int newMenu)
 	}
 }
 
+///
+/// Update input variables in main class
+///
 void Menu::ApplyInput(int &leng, int &amt)
 {
 	if (menuMode == Menus::Inp)
 	{
-		leng = items[0][0].substring(6).toInt();
-		amt = items[0][1].substring(5).toInt();
+		leng = items[0][0].substring(7).toInt();
+		amt = items[0][1].substring(8).toInt();
 		length = leng;	// Set length
 		parts = amt;	// Set parts
 	}
@@ -270,15 +286,23 @@ void Menu::ApplyInput(int &leng, int &amt)
 }
 
 ///
-///
+/// Notifications
 ///
 void Menu::Notification(int i)
 {
 	lcd.clear();
 	lcd.setCursor(0, 0);
-	lcd.print(items[4][0]);
-	lcd.setCursor(0, 1);
-	lcd.print(notification[i]);
+	if (i == 0)
+	{
+		lcd.print("   "+O+s+t+a+n+o+v);
+		lcd.setCursor(0, 1);
+		lcd.print("  "+a+k+t+si+v+si+r+o+v+a+n+"!");
+	}
+	else {
+		lcd.print(items[4][0]);
+		lcd.setCursor(0, 1);
+		lcd.print(notification[i]);
+	}
 }
 
 ///
@@ -288,9 +312,9 @@ void Menu::Input(char cha)
 {
 		if (menuMode == Menus::Inp)
 		{
-			if (upside && items[curX][curY].length() < 10)// "dlin: " - 6 + 4 numbers
+			if (upside && items[curX][curY].length() < 11)// "dlin: " - 7 + 4 numbers
 				items[curX][curY] += cha;
-			if (!upside && items[curX][curY + 1].length() < 7)	 // "kol: " - 5 + 2 numbers
+			if (!upside && items[curX][curY + 1].length() < 10)	 // "kol: " - 8 + 2 numbers
 				items[curX][curY + 1] += cha;
 		}
 		else if (curY<2) // Service
@@ -298,10 +322,10 @@ void Menu::Input(char cha)
 			if (upside && curY == 1 && items[curX][curY].length() < 15)
 				items[curX][curY] += cha;
 			else
-			if (upside && items[curX][curY].length() < 13)// "dlin: " - 6 + 4 numbers
+			if (upside && items[curX][curY].length() < 13)
 				items[curX][curY] += cha;
 			else
-			if (!upside && items[curX][curY + 1].length() < 15)	 // "kol: " - 5 + 2 numbers
+			if (!upside && items[curX][curY + 1].length() < 15)	 
 				items[curX][curY + 1] += cha;
 		}
 }
@@ -313,12 +337,12 @@ void Menu::DelLast()
 {
 	if (menuMode == Menus::Inp)
 	{
-		if (upside && items[curX][curY].length() > 6) //"dlin: " - 6
+		if (upside && items[curX][curY].length() > 7) //"dlina: " - 7
 		{
 			items[curX][curY] = items[curX][curY].substring(0, items[curX][curY].length() - 1);
 			lcd.clear();
 		}
-		if (!upside && items[curX][curY + 1].length() > 5) // "kol: "- 5
+		if (!upside && items[curX][curY + 1].length() > 8) // "kol-vo: "- 8
 		{
 			items[curX][curY + 1] = items[curX][curY + 1].substring(0, items[curX][curY + 1].length() - 1);
 			lcd.clear();

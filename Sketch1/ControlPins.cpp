@@ -59,9 +59,9 @@ void ControlPins::Stop()
 	notify = -1;
 	StopGear();
 	Sound(300);
-	delay(100);
+	delay(300);
 	Sound(300);
-	delay(100);
+	delay(300);
 	Sound(300);
 }
 

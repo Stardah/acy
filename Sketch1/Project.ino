@@ -190,24 +190,7 @@ void ServiceMode(char key)
 
 void NotifyMod() 
 {
-	serviceOn = false;
-	switch (notification)
-		{
-		case 0:
-			menu.SetMenuMode(Menus::Inp);;
-			lcd.cursor();
-			lcd.blink();
-			progRun = false;
-			controlPins.Stop();
-			controlPins.Reset();
-			menu.Notification(notification);
-			break;
-		case 1:
-			
-			break;
-		default:
-			break;
-		}
+
 }
 
 void RunningMode(char key)

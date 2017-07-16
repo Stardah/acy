@@ -1,6 +1,6 @@
 #include <LiquidCrystal.h>
 
-enum Menus {Inp, Stop, Run, Service };
+enum Menus {Inp, Stop, Run, Service, Notify };
 
 class Menu
 {
@@ -33,7 +33,7 @@ private:
 	int curX = 0;
 	int curY = 0;
 	bool upside = true;
-	//const String notification[] = { "УП записана","Ожидание резки","УП выполнена", "Ошибка" };
+	String notification[4] = { "FATAL ERROR","KNIFE"," ","УП выполнена"};
 	int length = 0;
 	int parts = 0;
 };

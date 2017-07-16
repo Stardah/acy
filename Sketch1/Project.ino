@@ -33,6 +33,8 @@ Menus cash = Menus::Inp; // Save previous menu
 bool progRun = false; // Access to write program
 bool stop = false; // stop menu
 bool serviceOn = false; // Service mode on
+int notification = -1;
+bool notifyAwait = false;
 volatile int encoderCounter = 0; // Encoder mm counter
 
 // Settings
@@ -76,11 +78,13 @@ void setup()
 
 void loop() 
 {
-	controlPins.UpdateInputs(encoderCounter);	// Update Gear
+	char key = keypad.getKey();					// Update Input
+	notification = controlPins.UpdateInputs(encoderCounter);	// Update Gear
+	if (notification != -1)	NotifyMod();
 	if (progRun)
 	{
 		kostyl++;
-		if (kostyl > 4000)
+		if (kostyl > 3000)
 		{
 			menu.RTUpdate(controlPins.GetLength(), controlPins.GetParts()); // Display current values
 			menu.DrawMenu();
@@ -96,7 +100,6 @@ void loop()
 			}
 		}
 	}
-	char key = keypad.getKey();					// Update Input
 	if (serviceOn)
 	{
 		kostyl++;
@@ -108,7 +111,8 @@ void loop()
 	}
 	if (key != NO_KEY)
 	{
-		if (serviceOn) ServiceMode(key);
+		if (notifyAwait) NotifyMod();
+		else if (serviceOn) ServiceMode(key);
 		else if (progRun) RunningMode(key);
 		else if (stop) StopMode(key);
 		else MenuMode(key);
@@ -162,6 +166,10 @@ void ServiceMode(char key)
 	case 'C':
 		menu.Down();
 		break;
+	case 'A':
+		break;
+	case '#':
+		break;
 	case 'D':
 		serviceOn = false;
 		menu.ApplyInput(eps, coolDown); // Get input
@@ -175,6 +183,29 @@ void ServiceMode(char key)
 		menu.Input(key);
 		break;
 	}
+}
+
+void NotifyMod() 
+{
+	serviceOn = false;
+	notifyAwait = notification != -1;
+		switch (notification)
+		{
+		case 0:
+			menu.SetMenuMode(Menus::Inp);;
+			lcd.cursor();
+			lcd.blink();
+			progRun = false;
+			controlPins.Stop();
+			controlPins.Reset();
+			menu.Notification(notification);
+			break;
+		case 1:
+			
+			break;
+		default:
+			break;
+		}
 }
 
 void RunningMode(char key)
@@ -192,10 +223,11 @@ void StopMode(char key)
 	{
 		if (key == '#') // Продолжаем
 		{
-			menu.RunProg(controlPins.GetLength(), controlPins.GetParts());
 			progRun = true;
 			stop = false;
 			progRun = true;
+			controlPins.Start(programs.leng, programs.amt, encoderCounter);
+			menu.RunProg(controlPins.GetLength(), controlPins.GetParts());
 		}
 		else if (key == '*') // Стоп
 		{
@@ -217,7 +249,6 @@ void MenuMode(char key)
 		menu.DelLast();
 		break;
 	case '#':
-		menu.ApplyInput(programs.leng, programs.amt);
 		break;
 	case 'B':
 		menu.Up();

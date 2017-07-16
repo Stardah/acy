@@ -17,7 +17,7 @@ public:
 	void Start(long newlength, int newparts, int encoderCounter);
 	void Stop();
 	bool* ScanPins();
-	void UpdateInputs(int encoderCounter);
+	int UpdateInputs(int encoderCounter);
 
 	void SetEpsCool(int eps_, int coolDown_)
 	{
@@ -38,7 +38,7 @@ private:
 	void RunGear();
 	void StopGear();
 	void HandMode(int encoderCounter);
-	void AutoMod(int encoderCounter);
+	int AutoMod(int encoderCounter);
 	// Hand 
 	bool forRev1 = false;
 	bool forRev2 = false;

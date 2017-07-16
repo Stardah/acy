@@ -118,7 +118,11 @@ bool* ControlPins::ScanPins()
 /// update states for all pins and do doings
 ///
 bool wasAuto = false;
-void ControlPins::UpdateInputs(int encoderCounter)
+// -1 OK
+//  0 FULL_STOP
+//  1 KNIFE
+//  2
+int ControlPins::UpdateInputs(int encoderCounter)
 {
 	knife      = !ReadPin((int)pins::knife);
 	forRev1    = ReadPin((int)pins::forRev1);
@@ -128,7 +132,6 @@ void ControlPins::UpdateInputs(int encoderCounter)
 	emergency  = ReadPin((int)pins::emergency);
 	ifAuto     = !ReadPin((int)pins::handAuto);
 
-
 	encoderCounterRef = encoderCounter;
 
 	// TODO: notifications
@@ -136,8 +139,8 @@ void ControlPins::UpdateInputs(int encoderCounter)
 	{
 		sound = false;
 		StopGear();
+		return 0; // FULL_STOP
 	}
-
 
 	if (runOn && ifAuto) 
 	{
@@ -145,13 +148,12 @@ void ControlPins::UpdateInputs(int encoderCounter)
 		{
 			encoderLength = encoderCounter;
 			if (!knife) RunGear();
-			// else ALERT!
+			else return 1; // KNIFE
 		}
-		AutoMod(encoderCounter);
+		return AutoMod(encoderCounter);
 	}
 	else if (!ifAuto) HandMode(encoderCounter);
-
-	wasAuto = ifAuto;
+	return -1;
 }
 
 ///
@@ -159,6 +161,7 @@ void ControlPins::UpdateInputs(int encoderCounter)
 ///
 void ControlPins::HandMode(int encoderCounter)
 {
+	wasAuto = ifAuto;
 	if (knife) encoderLength = encoderCounter;
 	if (handDrive1 && handDrive2) // if both then stop
 		StopGear(); 
@@ -170,8 +173,9 @@ void ControlPins::HandMode(int encoderCounter)
 ///
 /// When controller controls the process
 ///
-void ControlPins::AutoMod(int encoderCounter)
+int ControlPins::AutoMod(int encoderCounter)
 {
+	wasAuto = ifAuto;
 	if (rollback) // Rollback
 	{
 		if (encoderCounter - encoderLength <= length + eps) // We've got it
@@ -182,6 +186,7 @@ void ControlPins::AutoMod(int encoderCounter)
 			rollback = false;
 			sound = true;					// sound
 			knifeSwitch = true;				// wait for a cut
+			return 1; // KNIFE
 		}
 		else RunGear();
 	}
@@ -208,7 +213,12 @@ void ControlPins::AutoMod(int encoderCounter)
 			}
 		if (parts == encoderParts) Stop(); // If all parts done stop process
 	}
-	if (knife && ((encoderCounter - encoderLength)>10)) StopGear(); // Knife down when we run
+	if (knife && ((encoderCounter - encoderLength) > 10))
+	{
+		StopGear(); // Knife down when we run
+		return 0;	// FULL_STOP
+	}
+	return -1;
 }
 
 ControlPins::~ControlPins()

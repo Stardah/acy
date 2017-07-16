@@ -91,10 +91,13 @@ Menu::Menu(const LiquidCrystal& lcdInit) :
 
 	// Close curX = 2
 	items[2][0] = P+r+o+d+o+l+zh+si+t+smyagkiy+':'+' '+'#';
-	items[2][1] = M+e+n+u+':'+' '+'*';
+	items[2][1] = P+r+o+g+r+a+m+m+a+':'+' '+'*';
 	// Service
 	items[3][0] = T + o + ch + n + o + s + t + smyagkiy + " = ";
 	items[3][1] = Z + a + d + e + r + zh + k + a + " = ";
+	// Notify curX = 4
+	items[4][0] = "  "+O+sh+si+b+k+a+"!";
+	items[4][1] = "     "+O+k+ " (D)";
 	// Print a message to the LCD.
 	lcd.print("  "+Z+a+g+r+y+z+k+a+"...");
 }
@@ -235,6 +238,11 @@ void Menu::SetMenuMode(int newMenu)
 		curX = 3;
 		curY = 0;
 		break;
+	case Notify:
+		lcd.clear();
+		curX = 4;
+		curY = 0;
+		break;
 	case Run:
 		break;
 	default:
@@ -265,7 +273,9 @@ void Menu::Notification(int i)
 {
 	lcd.clear();
 	lcd.setCursor(0, 0);
-	//lcd.print(notification[i]);
+	lcd.print(items[4][0]);
+	lcd.setCursor(0, 1);
+	lcd.print(notification[i]);
 }
 
 ///

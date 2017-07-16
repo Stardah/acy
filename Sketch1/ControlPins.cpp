@@ -43,6 +43,7 @@ void ControlPins::Start(long newlength, int newparts, int encoderCounter)
 	parts = newparts;
 	runOn = true;
 	encoderLength = encoderCounter; // set init conter to current length
+	Sound(700);
 	//RunGear();
 }
 
@@ -54,9 +55,14 @@ void ControlPins::Stop()
 {
 	//length = 0;
 	//parts = 0;
-	sound = false;
 	runOn = false;
+	notify = -1;
 	StopGear();
+	Sound(300);
+	delay(100);
+	Sound(300);
+	delay(100);
+	Sound(300);
 }
 
 ///
@@ -89,9 +95,6 @@ void ControlPins::RunGear()
 	}
 	if (gearSpeed) digitalWrite((int)pins::gearSpeed, HIGH);
 	else digitalWrite((int)pins::gearSpeed, LOW);
-
-	if (sound) digitalWrite((int)pins::sound, HIGH);
-	else digitalWrite((int)pins::sound, LOW);
 }
 
 ///
@@ -102,8 +105,7 @@ void ControlPins::StopGear()
 	digitalWrite((int)pins::gearForv, LOW);
 	digitalWrite((int)pins::gearRev, LOW);
 	digitalWrite((int)pins::gearSpeed, LOW);
-	if (sound) digitalWrite((int)pins::sound, HIGH);
-	else digitalWrite((int)pins::sound, LOW);
+    digitalWrite((int)pins::sound, LOW);
 }
 
 ///
@@ -125,34 +127,34 @@ bool* ControlPins::ScanPins()
 //  2
 int ControlPins::UpdateInputs(int encoderCounter)
 {
-	knife      = !ReadPin((int)pins::knife);
-	forRev1    = ReadPin((int)pins::forRev1);
-	forRev2    = ReadPin((int)pins::forRev2);
+	knife = !ReadPin((int)pins::knife);
+	forRev1 = ReadPin((int)pins::forRev1);
+	forRev2 = ReadPin((int)pins::forRev2);
 	handDrive1 = !ReadPin((int)pins::handDrive1);
 	handDrive2 = !ReadPin((int)pins::handDrive2);
-	emergency  = ReadPin((int)pins::emergency);
-	ifAuto     = !ReadPin((int)pins::handAuto);
+	emergency = ReadPin((int)pins::emergency);
+	ifAuto = !ReadPin((int)pins::handAuto);
 
 	encoderCounterRef = encoderCounter;
 
 	// TODO: notifications
-	if (emergency) 
+	if (emergency)
 	{
-		sound = false;
 		StopGear();
 		return 0; // FULL_STOP
 	}
-		if (!ifAuto) HandMode(encoderCounter);	// Hand Mode
-		else if (runOn && ifAuto)				// Auto Mode 
+	if (!ifAuto) HandMode(encoderCounter);	// Hand Mode
+	else if (runOn && ifAuto)				// Auto Mode 
+	{
+		if (firstIteration)// If it is the first iteration of program
 		{
-			if (firstIteration)// If it is the first iteration of program
-			{
-				knifeSwitch = true; // Wait for knife cut
-				encoderLength = encoderCounter;	// Update current encoderLength
-			}
-			return AutoMod(encoderCounter); // Do auto stuff
+			knifeSwitch = true; // Wait for knife cut
+			notify = 1;
+			encoderLength = encoderCounter;	// Update current encoderLength
 		}
-	return -1;
+		AutoMod(encoderCounter); // Do auto stuff
+	}
+	return notify;
 }
 
 ///
@@ -166,7 +168,8 @@ void ControlPins::HandMode(int encoderCounter)
 		StopGear(); 
 	else if (handDrive1 || handDrive2) // if presed move then move 
 		RunGear(); 
-	else StopGear(); 									// if not move then stop								
+	else StopGear(); 									// if not move then stop		
+	notify = -1;
 }
 
 ///
@@ -182,11 +185,9 @@ int ControlPins::AutoMod(int encoderCounter)
 			gearForv = true;	// Move Forward
 			gearSpeed = true;	// Whith high speed
 			rollback = false;	// End rollback
-			sound = true;		// Signal to cut
-			delay(500);
-			sound = false;		// Turn sound off
+			Sound(300);
 			knifeSwitch = true;	// Waiting for a cut
-			return 1; // KNIFE (notiry about cut movement)
+			notify = 1; // KNIFE (notiry about cut movement)
 		}
 		else RunGear();	// If we stil need rollback, just continue
 	}
@@ -204,9 +205,10 @@ int ControlPins::AutoMod(int encoderCounter)
 		{
 			if (!knife)
 			{
+				notify = -1;
 				RunGear(); // Run if knife is up
 
-				if (encoderCounter - encoderLength >= length) // It's time to cut but...
+				if (encoderCounter - encoderLength >= length - eps) // It's time to cut but...
 				{
 					StopGear();			// Stop engine
 					delay(coolDown);	// Wait while drive is stoping
@@ -224,7 +226,13 @@ int ControlPins::AutoMod(int encoderCounter)
 		}
 		if (parts == encoderParts) Stop(); // If all parts done stop process
 	}
-	return -1;
+}
+
+void ControlPins::Sound(int time)
+{
+	digitalWrite((int)pins::sound, HIGH);
+	delay(time);
+	digitalWrite((int)pins::sound, LOW);
 }
 
 ControlPins::~ControlPins()

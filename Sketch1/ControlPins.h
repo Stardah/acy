@@ -39,6 +39,7 @@ private:
 	void StopGear();
 	void HandMode(int encoderCounter);
 	int AutoMod(int encoderCounter);
+	void Sound(int time);
 	// Hand 
 	bool forRev1 = false;
 	bool forRev2 = false;
@@ -50,7 +51,7 @@ private:
 	bool ifAuto = false;		
 	bool gearForv = true;	// out
 	bool gearSpeed = true;	// out
-	bool sound = false;		// out
+	//bool sound = false;		// out
 	bool knife = false;
 
 	bool knifeSwitch = false;
@@ -66,5 +67,6 @@ private:
 	int eps = 0;
 	int coolDown = 0;
 	int kostyl = 0;
+	int notify = -1;
 };
 

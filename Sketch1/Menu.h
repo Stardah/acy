@@ -33,7 +33,7 @@ private:
 	int curX = 0;
 	int curY = 0;
 	bool upside = true;
-	String notification[4] = { "FATAL ERROR","KNIFE"," ","УП выполнена"};
+	String notification[4];
 	int length = 0;
 	int parts = 0;
 };

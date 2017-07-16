@@ -82,16 +82,20 @@ void loop()
 {
 	char key = keypad.getKey();					// Update Input
 	notification = controlPins.UpdateInputs(encoderCounter);	// Update Gear
-	if (notification != -1)	NotifyMod();
-	if (progRun)
+	notifyAwait = notification != -1;
+
+	kostyl++;
+	if (kostyl > 2000)
 	{
-		kostyl++;
-		if (kostyl > 3000)
+		if (notifyAwait) 
+			menu.Notification(notification);
+		else
+		if (progRun)
 		{
 			menu.RTUpdate(controlPins.GetLength(), controlPins.GetParts()); // Display current values
 			menu.DrawMenu();
 			kostyl = 0;
-			if (controlPins.GetParts() == programs.amt) 
+			if (controlPins.GetParts() == programs.amt)
 			{
 				menu.SetMenuMode(Menus::Inp);
 				progRun = false;
@@ -101,16 +105,13 @@ void loop()
 				controlPins.Reset();
 			}
 		}
-	}
-	if (serviceOn)
-	{
-		kostyl++;
-		if (kostyl > 2000) 
-		{
+		else
+		if (serviceOn) 
 			menu.DrawService(PinsUpdate(), encoderCounter);
-			kostyl = 0;
-		}
+
+		kostyl = 0;
 	}
+
 	if (key != NO_KEY)
 	{
 		if (notifyAwait) NotifyMod();
@@ -190,8 +191,7 @@ void ServiceMode(char key)
 void NotifyMod() 
 {
 	serviceOn = false;
-	notifyAwait = notification != -1;
-		switch (notification)
+	switch (notification)
 		{
 		case 0:
 			menu.SetMenuMode(Menus::Inp);;

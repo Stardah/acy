@@ -89,6 +89,9 @@ Menu::Menu(const LiquidCrystal& lcdInit) :
 		}
 	}
 
+	// Notifications
+	notification[1] ="    "+ O + t + r + e + zh + t + e+"!";
+
 	// Close curX = 2
 	items[2][0] = P+r+o+d+o+l+zh+si+t+smyagkiy+':'+' '+'#';
 	items[2][1] = P+r+o+g+r+a+m+m+a+':'+' '+'*';
@@ -96,7 +99,7 @@ Menu::Menu(const LiquidCrystal& lcdInit) :
 	items[3][0] = T + o + ch + n + o + s + t + smyagkiy + " = ";
 	items[3][1] = Z + a + d + e + r + zh + k + a + " = ";
 	// Notify curX = 4
-	items[4][0] = "  "+O+sh+si+b+k+a+"!";
+	items[4][0] = "    "+V+n+si+m+a+n+si+e+":";
 	items[4][1] = "     "+O+k+ " (D)";
 	// Print a message to the LCD.
 	lcd.print("  "+Z+a+g+r+y+z+k+a+"...");

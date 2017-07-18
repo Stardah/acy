@@ -32,24 +32,26 @@ PROG programs; // Actually don't need this
 Menus cash = Menus::Inp; // Save previous menu
 bool progRun = false; // Access to write program
 bool serviceOn = false; // Service mode on
-int notification = -1;
-int notificationWas = -1;
+long notification = -1;
+long notificationWas = -1;
 bool notifyAwait = false;
-volatile int encoderCounter = 0; // Encoder mm counter
+volatile long encoderCounter = 0; // Encoder mm counter
 
 // Settings
-int eps = 11;
-int epsOld = 11;
-int coolDown = 12;
-int coolDownOld = 12;
+long eps = 11;
+long epsOld = 11;
+long coolDown = 12;
+long coolDownOld = 12;
+long nozh = 5;
+long nozhOld = 5;
 //volatile bool encoderB = false;
-int kostyl = 0; // TODO replace it with timer
+long kostyl = 0; // TODO replace it with timer
 
-void Addprog(int leng, int amt)
+void Addprog(long leng, long amt)
 {
 	programs.leng = leng;
 	programs.amt = amt;
-	menu.UpdateValues(leng, amt);
+	menu.UpdateValues(leng, amt, nozh);
 }
 
 // addr		var
@@ -61,11 +63,13 @@ void setup()
 	//read settings
 	eps = EEPROM.read(0);
 	coolDown = EEPROM.read(1) * 256 + EEPROM.read(2);
+	nozh = EEPROM.read(3);
 
 	epsOld = eps;
 	coolDownOld = coolDown;
+	nozhOld = nozh;
 
-	controlPins.SetEpsCool(eps, coolDown);
+	controlPins.SetEpsCool(eps, coolDown, nozh);
 
 	//setup
 	lcd.begin(16, 2);
@@ -145,23 +149,28 @@ void UpdateSettings()
 		EEPROM.write(2, lowByte(coolDown));
 		coolDownOld = coolDown;
 	}
+	if (nozh != nozhOld)
+	{
+		EEPROM.write(3, nozh);
+		nozhOld = nozh;
+	}
 }
 
-int inputs[12];
-int* PinsUpdate() 
+long inputs[12];
+long* PinsUpdate() 
 {
-	inputs[0] = digitalRead((int)pins::forRev1);
-	inputs[1] = digitalRead((int)pins::forRev2);
-	inputs[2] = digitalRead((int)pins::handDrive1);
-	inputs[3] = digitalRead((int)pins::handDrive2);
-	inputs[4] = digitalRead((int)pins::emergency);
-	inputs[5] = digitalRead((int)pins::handAuto);
-	inputs[6] = digitalRead((int)pins::knife);
-	inputs[7] = false;//digitalRead((int)pins::gearForv);
-	inputs[8] = false;//digitalRead((int)pins::gearSpeed);
-	inputs[9] = false;//digitalRead((int)pins::sound);
-	inputs[10] =digitalRead((int)pins::encoderA);
-	inputs[11] =digitalRead((int)pins::encoderB);
+	inputs[0] = digitalRead((long)pins::forRev1);
+	inputs[1] = digitalRead((long)pins::forRev2);
+	inputs[2] = digitalRead((long)pins::handDrive1);
+	inputs[3] = digitalRead((long)pins::handDrive2);
+	inputs[4] = digitalRead((long)pins::emergency);
+	inputs[5] = digitalRead((long)pins::handAuto);
+	inputs[6] = digitalRead((long)pins::knife);
+	inputs[7] = false;//digitalRead((long)pins::gearForv);
+	inputs[8] = false;//digitalRead((long)pins::gearSpeed);
+	inputs[9] = false;//digitalRead((long)pins::sound);
+	inputs[10] =digitalRead((long)pins::encoderA);
+	inputs[11] =digitalRead((long)pins::encoderB);
 	return inputs;
 }
 
@@ -184,9 +193,9 @@ void ServiceMode(char key)
 		break;
 	case 'D':
 		serviceOn = false;
-		menu.ApplyInput(eps, coolDown); // Get input
+		menu.ApplySettings(eps, coolDown, nozh); // Get input
 		UpdateSettings();
-		controlPins.SetEpsCool(eps,coolDown); // Update eps and coolDown in controlPins
+		controlPins.SetEpsCool(eps,coolDown, nozh); // Update eps and coolDown in controlPins
 		if (cash == Menus::Run) menu.RunProg(programs.leng, programs.amt);
 		else menu.SetMenuMode(cash);
 		menu.DrawMenu();
@@ -239,6 +248,7 @@ void MenuMode(char key)
 		menu.Down();
 		break;
 	case 'A':
+		encoderCounter = 0;
 		menu.ApplyInput(programs.leng, programs.amt);
 		lcd.noCursor();
 		lcd.noBlink();
@@ -251,7 +261,7 @@ void MenuMode(char key)
 		serviceOn = true;
 		cash = menu.getMenu();
 		menu.SetMenuMode(Menus::Service);
-		menu.UpdateValues(eps, coolDown); // Service
+		menu.UpdateValues(eps, coolDown, nozh); // Service
 		break;
 	default:
 		menu.Input(key);

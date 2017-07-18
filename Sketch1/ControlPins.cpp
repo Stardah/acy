@@ -1,21 +1,21 @@
 #include "ControlPins.h"
 
-ControlPins::ControlPins(int error_)
+ControlPins::ControlPins(long error_)
 {
 	eps = error_;
-	pinMode((int)pins::encoderB, INPUT);
-	pinMode((int)pins::forRev1, INPUT);
-	pinMode((int)pins::forRev2, INPUT);
-	pinMode((int)pins::handDrive1, INPUT);
-	pinMode((int)pins::handDrive2, INPUT);
-	pinMode((int)pins::emergency, INPUT);
-	pinMode((int)pins::knife, INPUT);
-	pinMode((int)pins::handAuto, INPUT);
+	pinMode((long)pins::encoderB, INPUT);
+	pinMode((long)pins::forRev1, INPUT);
+	pinMode((long)pins::forRev2, INPUT);
+	pinMode((long)pins::handDrive1, INPUT);
+	pinMode((long)pins::handDrive2, INPUT);
+	pinMode((long)pins::emergency, INPUT);
+	pinMode((long)pins::knife, INPUT);
+	pinMode((long)pins::handAuto, INPUT);
 
-	pinMode((int)pins::gearForv, OUTPUT);
-	pinMode((int)pins::gearRev, OUTPUT);
-	pinMode((int)pins::gearSpeed, OUTPUT);
-	pinMode((int)pins::sound, OUTPUT);
+	pinMode((long)pins::gearForv, OUTPUT);
+	pinMode((long)pins::gearRev, OUTPUT);
+	pinMode((long)pins::gearSpeed, OUTPUT);
+	pinMode((long)pins::sound, OUTPUT);
 }
 
 ///
@@ -39,7 +39,7 @@ void ControlPins::Reset()
 ///
 /// Initialize variables
 ///
-void ControlPins::Start(long newlength, int newparts, int encoderCounter)
+void ControlPins::Start(long newlength, long newparts, long encoderCounter)
 {
 	length = newlength;
 	parts = newparts;
@@ -79,27 +79,27 @@ void ControlPins::RunGear()
 	{
 		if (handDrive1)
 		{
-			if (forRev1) digitalWrite((int)pins::gearForv, HIGH);
-			else digitalWrite((int)pins::gearRev, HIGH);
+			if (forRev1) digitalWrite((long)pins::gearForv, HIGH);
+			else digitalWrite((long)pins::gearRev, HIGH);
 		}
 		if (handDrive2)
 		{
-			if (forRev2) digitalWrite((int)pins::gearForv, HIGH);
-			else digitalWrite((int)pins::gearRev, HIGH);
+			if (forRev2) digitalWrite((long)pins::gearForv, HIGH);
+			else digitalWrite((long)pins::gearRev, HIGH);
 		}
 	}
 	else if (gearForv)
 	{
-		digitalWrite((int)pins::gearForv, HIGH); // Auto forward
-		digitalWrite((int)pins::gearRev, LOW);
+		digitalWrite((long)pins::gearForv, HIGH); // Auto forward
+		digitalWrite((long)pins::gearRev, LOW);
 	}
 	else
 	{
-		digitalWrite((int)pins::gearRev, HIGH); // Auto reverse
-		digitalWrite((int)pins::gearForv, LOW);
+		digitalWrite((long)pins::gearRev, HIGH); // Auto reverse
+		digitalWrite((long)pins::gearForv, LOW);
 	}
-	if (gearSpeed) digitalWrite((int)pins::gearSpeed, HIGH);
-	else digitalWrite((int)pins::gearSpeed, LOW);
+	if (gearSpeed) digitalWrite((long)pins::gearSpeed, HIGH);
+	else digitalWrite((long)pins::gearSpeed, LOW);
 }
 
 ///
@@ -107,10 +107,10 @@ void ControlPins::RunGear()
 ///
 void ControlPins::StopGear()
 {
-	digitalWrite((int)pins::gearForv, LOW);
-	digitalWrite((int)pins::gearRev, LOW);
-	digitalWrite((int)pins::gearSpeed, LOW);
-    digitalWrite((int)pins::sound, LOW);
+	digitalWrite((long)pins::gearForv, LOW);
+	digitalWrite((long)pins::gearRev, LOW);
+	digitalWrite((long)pins::gearSpeed, LOW);
+    digitalWrite((long)pins::sound, LOW);
 }
 
 ///
@@ -119,7 +119,7 @@ void ControlPins::StopGear()
 bool* ControlPins::ScanPins()
 {
 	bool scan[5];
-	for (int i = 0; i < 5; i++) scan[i] = true;
+	for (long i = 0; i < 5; i++) scan[i] = true;
 	return  scan;
 }
 
@@ -130,15 +130,15 @@ bool* ControlPins::ScanPins()
 //  0 FULL_STOP
 //  1 KNIFE
 //  2
-int ControlPins::UpdateInputs(int encoderCounter)
+long ControlPins::UpdateInputs(long encoderCounter)
 {
-	knife = !ReadPin((int)pins::knife);
-	forRev1 = ReadPin((int)pins::forRev1);
-	forRev2 = ReadPin((int)pins::forRev2);
-	handDrive1 = !ReadPin((int)pins::handDrive1);
-	handDrive2 = !ReadPin((int)pins::handDrive2);
-	emergency = ReadPin((int)pins::emergency);
-	ifAuto = !ReadPin((int)pins::handAuto);
+	knife = !ReadPin((long)pins::knife);
+	forRev1 = ReadPin((long)pins::forRev1);
+	forRev2 = ReadPin((long)pins::forRev2);
+	handDrive1 = !ReadPin((long)pins::handDrive1);
+	handDrive2 = !ReadPin((long)pins::handDrive2);
+	emergency = ReadPin((long)pins::emergency);
+	ifAuto = !ReadPin((long)pins::handAuto);
 
 	encoderCounterRef = encoderCounter;
 
@@ -165,7 +165,7 @@ int ControlPins::UpdateInputs(int encoderCounter)
 ///
 /// When emploee controls the process himself
 ///
-void ControlPins::HandMode(int encoderCounter)
+void ControlPins::HandMode(long encoderCounter)
 {
 	firstIteration = true;
 	if (knife) encoderLength = encoderCounter;
@@ -180,11 +180,11 @@ void ControlPins::HandMode(int encoderCounter)
 ///
 /// When controller controls the process
 ///
-int ControlPins::AutoMod(int encoderCounter)
+long ControlPins::AutoMod(long encoderCounter)
 {
 	if (rollback) // Rollback (2nd step)
 	{
-		if (encoderCounter - encoderLength <= length + eps) // We've got it
+		if (encoderCounter - encoderLength <= length + eps + nozh) // We've got it
 		{
 			StopGear();
 			gearForv = true;	// Move Forward
@@ -213,7 +213,7 @@ int ControlPins::AutoMod(int encoderCounter)
 				notify = -1;
 				RunGear(); // Run if knife is up
 
-				if (encoderCounter - encoderLength >= length - eps) // It's time to cut but...
+				if (encoderCounter - encoderLength >= length - eps + nozh) // It's time to cut but...
 				{
 					StopGear();			// Stop engine
 					delay(coolDown);	// Wait while drive is stoping
@@ -233,11 +233,11 @@ int ControlPins::AutoMod(int encoderCounter)
 	}
 }
 
-void ControlPins::Sound(int time)
+void ControlPins::Sound(long time)
 {
-	digitalWrite((int)pins::sound, HIGH);
+	digitalWrite((long)pins::sound, HIGH);
 	delay(time);
-	digitalWrite((int)pins::sound, LOW);
+	digitalWrite((long)pins::sound, LOW);
 }
 
 ControlPins::~ControlPins()

@@ -8,28 +8,29 @@ enum class pins { encoderA = 20, encoderB = 21, knife = 50, forRev1 = 48, forRev
 class ControlPins
 {
 public:
-	ControlPins(int error);
-	static bool ReadPin(int num) 
+	ControlPins(long error);
+	static bool ReadPin(long num) 
 	{
 		return bool(digitalRead(num));
 	};
 	void Reset();
-	void Start(long newlength, int newparts, int encoderCounter);
+	void Start(long newlength, long newparts, long encoderCounter);
 	void Stop();
 	bool* ScanPins();
-	int UpdateInputs(int encoderCounter);
+	long UpdateInputs(long encoderCounter);
 
-	void SetEpsCool(int eps_, int coolDown_)
+	void SetEpsCool(long eps_, long coolDown_, long nozh_)
 	{
 		eps = eps_;
 		coolDown = coolDown_;
+		nozh = nozh_;
 	};
-	int GetLength() 
+	long GetLength() 
 	{
 		//if (knifeSwitch) return length;
 		return encoderCounterRef-encoderLength;
 	};
-	int GetParts()
+	long GetParts()
 	{
 		return encoderParts;
 	};
@@ -42,9 +43,9 @@ public:
 private:
 	void RunGear();
 	void StopGear();
-	void HandMode(int encoderCounter);
-	int AutoMod(int encoderCounter);
-	void Sound(int time);
+	void HandMode(long encoderCounter);
+	long AutoMod(long encoderCounter);
+	void Sound(long time);
 	// Hand 
 	bool forRev1 = false;
 	bool forRev2 = false;
@@ -64,14 +65,15 @@ private:
 	bool rollback = false;
 	bool firstIteration = true;
 	//long encoderCounter = 0; // mm counter
-	int encoderLength = 0;
-	int encoderParts = 0;
-	int encoderCounterRef;
-	int length = 0;
-	int parts = 0;
-	int eps = 0;
-	int coolDown = 0;
-	int kostyl = 0;
-	int notify = -1;
+	long encoderLength = 0;
+	long encoderParts = 0;
+	long encoderCounterRef;
+	long length = 0;
+	long parts = 0;
+	long eps = 0;
+	long coolDown = 0;
+	long nozh = 5;
+	long kostyl = 0;
+	long notify = -1;
 };
 

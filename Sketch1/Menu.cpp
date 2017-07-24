@@ -91,7 +91,7 @@ Menu::Menu(const LiquidCrystal& lcdInit) :
 
 	// Notifications
 	notification[0] = ""+A+v+a+r+". "+o+s+t+a+n+o+v+"!";
-	notification[1] ="    "+ O + t + r + e + zh + t + e+"!";
+	notification[1] ="    "+ O + t + r + e + zh +smyagkiy+ t + e+"!";
 
 	// Close curX = 2
 	items[2][0] = P+r+o+d+o+l+zh+si+t+smyagkiy+':'+' '+'#';
@@ -117,7 +117,7 @@ void Menu::UpdateValues(long leng, long amt, long width)
 	{
 		items[curX][0] = T + o + ch + n + o + s + t + smyagkiy + " = " + String(leng);
 		items[curX][1] = Z + a + d + e + r + zh + k + a + " = " + String(amt);
-		items[curX][2] = D+l+si+n+"."+n+o+zh+a+ "= " + String(width); // 11
+		items[curX][2] = Sh+si+r+". "+n+o+zh+a+ "= " + String(width); // 11
 	}
 }
 

@@ -27,7 +27,7 @@ public:
 	}
 private:
 	static const size_t maxX = 5;
-	static const size_t maxY = 8;
+	static const size_t maxY = 9;
 	Menus menuMode = Menus::Inp;
 	LiquidCrystal lcd;
 	String items[maxX][maxY];
